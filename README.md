@@ -7,6 +7,9 @@ After the one-time model download you can unplug the network cable and it keeps 
 
 🇷🇺 [Читать по-русски](README.ru.md)
 
+[![Checks](https://github.com/geft1310-hue/golos/actions/workflows/ci.yml/badge.svg)](https://github.com/geft1310-hue/golos/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 > **Scope, up front:** Golos recognises **Russian only**, and runs on **Linux/X11** today.
 > Windows and Android are on the roadmap. If you need another language, this is not your tool —
 > and no hard feelings.

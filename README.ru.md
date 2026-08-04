@@ -10,6 +10,9 @@
 
 🇬🇧 [In English](README.md)
 
+[![Проверки](https://github.com/geft1310-hue/golos/actions/workflows/ci.yml/badge.svg)](https://github.com/geft1310-hue/golos/actions/workflows/ci.yml)
+[![Лицензия MIT](https://img.shields.io/badge/лицензия-MIT-blue.svg)](LICENSE)
+
 ---
 
 ## Установка
