@@ -78,14 +78,15 @@ ok "библиотеки на месте"
 
 # ------------------------------------------------------------------- 3. сама модель
 
-say "Шаг 3 из 4. Модель распознавания речи (215 МБ)"
+say "Шаг 3 из 4. Модель распознавания речи (217 МБ)"
 
-MODEL_DIR="$HOME/.local/share/golos/models/gigaam-v3-e2e-ctc"
+MODEL="gigaam-v3-e2e-rnnt"
+MODEL_DIR="$HOME/.local/share/golos/models/$MODEL"
 if [[ -f "$MODEL_DIR/manifest.json" ]]; then
     ok "модель уже скачана"
 else
     echo "  Скачивается один раз. Дальше интернет не нужен вообще."
-    .venv/bin/python tools/fetch_models.py gigaam-v3-e2e-ctc || die "не удалось скачать модель"
+    .venv/bin/python tools/fetch_models.py "$MODEL" || die "не удалось скачать модель"
     ok "модель скачана"
 fi
 

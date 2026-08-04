@@ -63,7 +63,7 @@ Golos gives you this instead:
 
 Punctuation, capitalisation and digits are not a post-processing hack bolted on afterwards —
 the model emits them natively, as part of recognition. The vendor's own evaluation puts comma
-F1 at **83.7** and full-stop F1 at **86.7**.
+F1 at **84.5** and full-stop F1 at **86.7**.
 
 ---
 
@@ -77,12 +77,12 @@ numbers are in [`bench/`](bench/) and you can re-run every one of them.
 
 | | |
 |---|---|
-| Recognition speed | **RTF 0.26** — 10 seconds of speech transcribed in 2.6 s |
-| RAM, idle (waiting for the key) | ~64 MB |
-| RAM, model loaded | ~320 MB |
-| RAM returned to the OS on unload | 257 of 291 MB |
-| Cold model load from disk | 1.6–1.8 s |
-| Disk | 215 MB, the model |
+| Recognition speed | **RTF 0.31** — 10 seconds of speech transcribed in 3.1 s |
+| RAM, idle (waiting for the key) | ~65 MB |
+| RAM, model loaded | ~304 MB |
+| RAM returned to the OS on unload | 238 of 273 MB |
+| Cold model load from disk | 1.7–1.9 s |
+| Disk | 217 MB, the model |
 | Network traffic while running | **zero** |
 
 Two design decisions make the memory numbers real rather than cosmetic. The microphone is
@@ -96,11 +96,11 @@ These are **not our measurements.** Two independent sources, both linked:
 
 **Vendor's own evaluation** ([GigaAM, 10 Russian test sets](https://github.com/salute-developers/GigaAM/blob/main/evaluation.md)) — WER %, lower is better:
 
-| | GigaAM v3 e2e-ctc *(what Golos ships)* | Whisper-large-v3 |
+| | GigaAM v3 e2e-rnnt *(what Golos ships)* | Whisper-large-v3 |
 |---|---|---|
-| Average over 10 sets | **12.0** | 21.0 |
-| Golos Farfield | **6.1** | 16.4 |
-| Callcenter | **13.3** | 23.1 |
+| Average over 10 sets | **11.2** | 21.0 |
+| Golos Farfield | **5.5** | 16.4 |
+| Callcenter | **12.6** | 23.1 |
 
 **Third-party benchmark** ([Habr, 6 public Russian test sets](https://habr.com/ru/articles/1042574/)) — WER %:
 
@@ -136,7 +136,7 @@ cd golos
 ```
 
 That is the whole thing. The installer checks what is missing rather than blindly installing,
-so it usually does not even need your password. It downloads the 215 MB model **once**, and
+so it usually does not even need your password. It downloads the 217 MB model **once**, and
 offers to start Golos with your session.
 
 ```bash
@@ -161,6 +161,10 @@ Talk for as long as you like — long speech is split on natural pauses and stit
 together. The hotkey is configurable, as is the microphone, the idle-unload timeout, and an
 optional clipboard auto-wipe.
 
+Settings also offer a **faster, slightly less accurate** variant (`e2e-ctc`, RTF 0.26 against
+0.31) and a **fastest one with no punctuation at all**. Picking one downloads it once; the
+default is the accurate one and most people should leave it alone.
+
 ---
 
 ## Privacy: what it sees, and what it never does
@@ -181,6 +185,12 @@ behaviour — including the uncomfortable part, which is the part nobody else pr
 
 Model files are pinned to an exact commit and checksummed on every start.
 `~/.config/golos` and `~/.local/share/golos` are created `0700`.
+
+**The one exception, stated plainly:** the model has to be downloaded once. That download is
+performed by a *separate* program — [`tools/fetch_models.py`](tools/fetch_models.py) — run by
+the installer, or launched by Golos if you deliberately switch to another recognition variant
+in the settings. The dictation process itself contains no networking code and opens no socket,
+which is what makes the first row of that table checkable rather than merely promised.
 
 ### What it does see — and you should know this
 
@@ -243,6 +253,6 @@ Golos is a thin, careful wrapper around other people's excellent work:
 
 - **[GigaAM v3](https://github.com/salute-developers/GigaAM)** — SberDevices, MIT. The model.
 - **[onnx-asr](https://github.com/istupakov/onnx-asr)** — istupakov, MIT. Runs it with numpy and
-  onnxruntime alone, no PyTorch — which is why the whole thing fits in 320 MB.
+  onnxruntime alone, no PyTorch — which is why the whole thing fits in 304 MB.
 
 Golos itself is MIT. Take it, fork it, ship it.

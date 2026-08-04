@@ -8,16 +8,18 @@ from __future__ import annotations
 
 import logging
 import os
+import subprocess
 import sys
+import threading
 from pathlib import Path
 
 import gi
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk  # noqa: E402
+from gi.repository import GLib, Gtk  # noqa: E402
 
 from golos.audio import list_input_devices  # noqa: E402
-from golos.config import CONFIG_DIR, Config  # noqa: E402
+from golos.config import CONFIG_DIR, MODELS_DIR, Config  # noqa: E402
 from golos.hotkey import keycode_label  # noqa: E402
 
 log = logging.getLogger(__name__)
@@ -25,10 +27,17 @@ log = logging.getLogger(__name__)
 AUTOSTART_PATH = Path.home() / ".config/autostart/golos.desktop"
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
+# Размеры — сколько занимает вариант на диске. Показываем их прямо в списке: человек
+# должен видеть цену выбора до того, как выберет, а не после.
 MODEL_CHOICES = [
-    ("gigaam-v3-e2e-ctc", "С запятыми и заглавными буквами (рекомендуется)"),
-    ("gigaam-v3-ctc", "Чуть быстрее, но без знаков препинания"),
+    ("gigaam-v3-e2e-rnnt", "Точнее, со знаками препинания (рекомендуется)", 217),
+    ("gigaam-v3-e2e-ctc", "Быстрее, тоже со знаками препинания", 215),
+    ("gigaam-v3-ctc", "Самая быстрая, без знаков препинания", 215),
 ]
+
+
+def model_is_downloaded(name: str) -> bool:
+    return (MODELS_DIR / name / "manifest.json").is_file()
 
 
 class SettingsDialog(Gtk.Dialog):
@@ -41,6 +50,7 @@ class SettingsDialog(Gtk.Dialog):
         self._config = config
         self._on_apply = on_apply
         self._keycode = config.hotkey_keycode
+        self._model_before = config.model  # чтобы откатиться, если скачать не вышло
 
         self.add_button("Отмена", Gtk.ResponseType.CANCEL)
         self.add_button("Сохранить", Gtk.ResponseType.OK)
@@ -80,8 +90,9 @@ class SettingsDialog(Gtk.Dialog):
 
         # --- модель ---
         self._model_combo = Gtk.ComboBoxText()
-        for name, title in MODEL_CHOICES:
-            self._model_combo.append(name, title)
+        for name, title, size_mb in MODEL_CHOICES:
+            suffix = "" if model_is_downloaded(name) else f" — скачать {size_mb} МБ"
+            self._model_combo.append(name, title + suffix)
         self._model_combo.set_active_id(config.model)
         grid.attach(_label("Распознавание:"), 0, row, 1, 1)
         grid.attach(self._model_combo, 1, row, 1, 1)
@@ -184,9 +195,104 @@ class SettingsDialog(Gtk.Dialog):
 
     def apply(self) -> None:
         config = self.collect()
+        # Выбран вариант, которого ещё нет на диске. Скачать его надо здесь: иначе
+        # человек нажмёт «Сохранить», а в следующий раз получит «Файлы модели не
+        # найдены» вместо диктовки и не поймёт, при чём тут настройки.
+        if not model_is_downloaded(config.model) and not download_model(self, config.model):
+            log.info("вариант %s не скачан, остаёмся на %s", config.model, self._model_before)
+            config.model = self._model_before
         config.save()
         set_autostart(self._autostart_check.get_active())
         self._on_apply(config)
+
+
+def download_model(parent: Gtk.Window, name: str) -> bool:
+    """Спрашивает согласие и скачивает недостающий вариант распознавания.
+
+    Качает отдельный процесс (tools/fetch_models.py), а не сам Golos, и это не
+    формальность: программа, которая слушает микрофон, не открывает сетевых соединений
+    вообще (S6) — проверяется в bench/test_privacy.py. Скачивание — единственное
+    исключение, и оно вынесено наружу именно затем, чтобы утверждение оставалось правдой.
+    """
+    size_mb = next((mb for choice_name, _, mb in MODEL_CHOICES if choice_name == name), 0)
+    script = PROJECT_ROOT / "tools" / "fetch_models.py"
+    if not script.is_file():
+        _message(parent, "Не нашёл, чем скачать",
+                 f"Файл {script} отсутствует. Похоже, программа перемещена не целиком.")
+        return False
+
+    ask = Gtk.MessageDialog(
+        transient_for=parent,
+        flags=0,
+        message_type=Gtk.MessageType.QUESTION,
+        buttons=Gtk.ButtonsType.OK_CANCEL,
+        text="Этот вариант нужно один раз скачать",
+    )
+    ask.format_secondary_text(
+        f"{size_mb} МБ, нужен интернет. Дальше он работает без сети, как и всё остальное.\n"
+        "Скачиванием занимается отдельная программа — Golos сам в сеть не выходит."
+    )
+    proceed = ask.run() == Gtk.ResponseType.OK
+    ask.destroy()
+    if not proceed:
+        return False
+
+    dialog = Gtk.Dialog(title="Скачивание", transient_for=parent, flags=0)
+    dialog.add_button("Отмена", Gtk.ResponseType.CANCEL)
+    dialog.set_default_size(380, -1)
+    box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+    for margin in ("top", "bottom", "start", "end"):
+        getattr(box, f"set_margin_{margin}")(18)
+    spinner = Gtk.Spinner()
+    spinner.start()
+    box.pack_start(spinner, False, False, 0)
+    box.pack_start(
+        Gtk.Label(label=f"Скачиваю {size_mb} МБ. Это несколько минут,\nокно можно не трогать."),
+        False, False, 0,
+    )
+    dialog.get_content_area().add(box)
+    dialog.show_all()
+
+    process = subprocess.Popen(
+        [sys.executable, str(script), name],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    stderr_tail: list[str] = []
+
+    def wait_and_close() -> None:
+        _, err = process.communicate()
+        stderr_tail.extend((err or "").strip().splitlines()[-3:])
+        GLib.idle_add(dialog.response, Gtk.ResponseType.OK)
+
+    threading.Thread(target=wait_and_close, daemon=True).start()
+    response = dialog.run()
+    dialog.destroy()
+
+    if response != Gtk.ResponseType.OK:  # «Отмена» или закрыли окно
+        process.terminate()
+        return False
+    if process.returncode == 0 and model_is_downloaded(name):
+        return True
+
+    log.error("не удалось скачать %s: код %s, %s", name, process.returncode, stderr_tail)
+    _message(parent, "Скачать не удалось",
+             "\n".join(stderr_tail) or "Проверьте интернет и попробуйте ещё раз.")
+    return False
+
+
+def _message(parent: Gtk.Window, title: str, body: str) -> None:
+    dialog = Gtk.MessageDialog(
+        transient_for=parent,
+        flags=0,
+        message_type=Gtk.MessageType.WARNING,
+        buttons=Gtk.ButtonsType.OK,
+        text=title,
+    )
+    dialog.format_secondary_text(body)
+    dialog.run()
+    dialog.destroy()
 
 
 def set_autostart(enabled: bool) -> None:

@@ -29,7 +29,9 @@ import os
 import sys
 from pathlib import Path
 
-MODELS = ["gigaam-v3-e2e-ctc", "gigaam-v3-ctc"]
+# Умолчание — то же, что в Config.model. Остальные варианты качаются по требованию,
+# когда человек выбирает их в настройках: класть 645 МБ при установке незачем.
+MODELS = ["gigaam-v3-e2e-rnnt"]
 QUANTIZATION = "int8"
 MODELS_DIR = Path.home() / ".local/share/golos/models"
 
@@ -38,7 +40,7 @@ def build_allow_patterns(model_name: str, quantization: str) -> list[str]:
     """Повторяет логику Resolver._download_model, но под нашим контролем.
 
     Нужно, чтобы качались только файлы нужного варианта (~225 МБ), а не весь
-    репозиторий (4.46 ГБ со всеми fp32 и rnnt).
+    репозиторий (4.46 ГБ со всеми вариантами и весами fp32).
     """
     from onnx_asr.loader import create_asr_resolver
 

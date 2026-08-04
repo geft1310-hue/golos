@@ -32,9 +32,11 @@ class Config:
     min_press_seconds: float = 0.3  # короче — считаем случайным касанием, не распознаём
 
     # --- модель ---
-    model: str = "gigaam-v3-e2e-ctc"
+    model: str = "gigaam-v3-e2e-rnnt"
     quantization: str = "int8"
-    threads: int = 2  # уточняется по итогам bench/benchmark.py
+    # 2, а не 4: у rnnt на четырёх потоках RTF 0.383 против 0.311 на двух — на этом
+    # процессоре потоки дерутся за общий кэш. Проверено bench/benchmark.py.
+    threads: int = 2
     offline: bool = True  # S6: после первой загрузки в сеть не ходим
     idle_unload_seconds: int = 300  # 0 = держать модель в памяти всегда
     max_chunk_seconds: int = 20  # предел GigaAM ~25 с, режем с запасом

@@ -4,7 +4,7 @@
 Машина: i7-2640M (Sandy Bridge, AVX без AVX2/VNNI), 2 ядра / 4 потока, swap исчерпан.
 Заявленные onnx-asr цифры (RTFx 59) сняты на 9800X3D с AVX-512 и сюда не переносятся.
 
-Матрица: {gigaam-v3-e2e-ctc, gigaam-v3-ctc} x {2, 4 потока}, только int8.
+Матрица: {gigaam-v3-e2e-rnnt, gigaam-v3-e2e-ctc, gigaam-v3-ctc} x {2, 4 потока}, только int8.
 fp32 исключён осознанно: 885 МБ весов + активации не помещаются в доступную память.
 
 Каждая конфигурация гоняется в отдельном подпроцессе — иначе ru_maxrss даёт
@@ -26,7 +26,7 @@ from pathlib import Path
 import numpy as np
 from sample_audio import read_wav_mono_f32
 
-MODELS = ["gigaam-v3-e2e-ctc", "gigaam-v3-ctc"]
+MODELS = ["gigaam-v3-e2e-rnnt", "gigaam-v3-e2e-ctc", "gigaam-v3-ctc"]
 THREAD_COUNTS = [2, 4]
 QUANTIZATION = "int8"
 

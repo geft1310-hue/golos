@@ -4,6 +4,10 @@
 Проверяет открытый риск из плана: ONNX Runtime не всегда возвращает освобождённую
 память операционной системе. Если после unload() RSS не падает, ленивая выгрузка
 бессмысленна — на машине с исчерпанным swap это принципиально.
+
+Аргумент — какой вариант распознавания мерить. Без него берётся сохранённый в
+настройках, а он у давнего пользователя запросто окажется не тем, что стоит
+умолчанием сейчас: цифры получатся про старую модель, а выглядеть будут про новую.
 """
 
 from __future__ import annotations
@@ -29,9 +33,15 @@ def rss_mb() -> float:
 
 def main() -> int:
     config = Config.load()
+    if len(sys.argv) > 1:
+        config.model = sys.argv[1]
+    if not (config.model_dir / "manifest.json").is_file():
+        print(f"нет весов {config.model}: python tools/fetch_models.py {config.model}")
+        return 1
     recognizer = Recognizer(config)
 
     base = rss_mb()
+    print(f"вариант: {config.model}, потоков {config.threads}")
     print(f"1. интерпретатор без модели     {base:7.1f} МБ")
 
     t0 = time.monotonic()
