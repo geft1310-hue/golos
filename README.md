@@ -1,238 +1,248 @@
-# Golos — голосовая диктовка, которая работает без интернета
+# Golos
 
-Зажали клавишу — говорите. Отпустили — текст уже в буфере обмена, вставляйте
-через <kbd>Ctrl</kbd>+<kbd>V</kbd> куда угодно: в письмо, в мессенджер, в документ.
+**Hold a key. Talk. Let go. The text is in your clipboard — with the commas already in it.**
 
-Речь распознаётся **на вашем компьютере**. Ничего никуда не отправляется, интернет
-после установки не нужен вообще — можно выдернуть кабель и всё продолжит работать.
-Модель — GigaAM v3 от Сбера, она хорошо знает русский язык и сама расставляет
-запятые, заглавные буквы и числа цифрами.
+Offline Russian speech-to-text for Linux. Your voice never leaves the machine.
+After the one-time model download you can unplug the network cable and it keeps working.
+
+🇷🇺 [Читать по-русски](README.ru.md)
+
+> **Scope, up front:** Golos recognises **Russian only**, and runs on **Linux/X11** today.
+> Windows and Android are on the roadmap. If you need another language, this is not your tool —
+> and no hard feelings.
 
 ---
 
-## Установка
+## Why this exists
 
-Один раз откройте терминал (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>T</kbd>), скопируйте
-туда эту строчку и нажмите Enter:
+Dictation that actually feels good is a solved problem — if you are willing to accept all three of these:
+
+| The usual deal | |
+|---|---|
+| 💸 **Paid, forever** | Wispr Flow, Superwhisper and friends are subscriptions |
+| 🍎 **macOS only** | on Linux there is essentially nothing comparable |
+| ☁️ **Cloud** | every word you dictate is processed on someone else's computer |
+
+The obvious escape is Whisper, running locally. For Russian, that escape has a catch that
+nobody mentions until you try it:
+
+> **Whisper cannot keep up with real time on a CPU.**
+> An independent benchmark measured `whisper-large-v3-turbo` at **RTF 1.02** on CPU —
+> ten seconds of speech takes *more than ten seconds* to transcribe. That is not dictation.
+> That is waiting. ([source](https://habr.com/ru/articles/1042574/))
+
+So you buy a GPU, or you go back to the cloud.
+
+**Golos takes the third option: a model that is actually good at Russian.**
+[GigaAM v3](https://github.com/salute-developers/GigaAM) from SberDevices is Russian-specialised
+rather than multilingual — which makes it small, fast and unusually accurate on its one language.
+In the same independent benchmark it ran at **RTF 0.047 on CPU — over 20× faster than Whisper**,
+at comparable accuracy on Russian. The author's conclusion for CPU-only deployments was
+GigaAM, not Whisper.
+
+And it punctuates. That matters more than it sounds.
+
+---
+
+## Why Russian speakers should care
+
+If you have ever used the microphone button on an Android keyboard, you know the output:
 
 ```
-cd ~/projects/golos && ./install.sh
+привет как дела я сегодня буду в офисе часов в пять давай встретимся
 ```
 
-Установщик сам проверит, чего не хватает, и скажет, что делает. Он может один раз
-спросить пароль от компьютера — тот же, которым вы входите в систему; это нужно
-только если каких-то системных компонентов не окажется.
+One long breathless line. No commas, no full stops, no capitals, numbers spelled out as words.
+You then spend as long fixing it as you would have spent typing it.
 
-Скачается около 215 МБ — это сама модель распознавания. **Один раз.**
-
-В конце спросит, запускать ли Golos автоматически при включении компьютера.
-Ответить можно и потом — этот переключатель есть в настройках программы.
-
-Запустить сразу после установки:
+Golos gives you this instead:
 
 ```
+Привет, как дела? Я сегодня буду в офисе часов в 5. Давай встретимся.
+```
+
+Punctuation, capitalisation and digits are not a post-processing hack bolted on afterwards —
+the model emits them natively, as part of recognition. The vendor's own evaluation puts comma
+F1 at **83.7** and full-stop F1 at **86.7**.
+
+---
+
+## Numbers
+
+### Ours — measured, on deliberately bad hardware
+
+Everything below was measured on an **Intel i7-2640M — a 2-core laptop CPU from 2011** with 8 GB
+of RAM. Not cherry-picked hardware; the oldest thing we had. The scripts that produced these
+numbers are in [`bench/`](bench/) and you can re-run every one of them.
+
+| | |
+|---|---|
+| Recognition speed | **RTF 0.26** — 10 seconds of speech transcribed in 2.6 s |
+| RAM, idle (waiting for the key) | ~64 MB |
+| RAM, model loaded | ~320 MB |
+| RAM returned to the OS on unload | 257 of 291 MB |
+| Cold model load from disk | 1.6–1.8 s |
+| Disk | 215 MB, the model |
+| Network traffic while running | **zero** |
+
+Two design decisions make the memory numbers real rather than cosmetic. The microphone is
+**not open** until you press the key, and the model is **unloaded** after a few idle minutes.
+When it needs to come back, loading starts *at the same moment as your recording* — so it
+happens while you are still talking, and you never see it.
+
+### Theirs — accuracy, measured by other people
+
+These are **not our measurements.** Two independent sources, both linked:
+
+**Vendor's own evaluation** ([GigaAM, 10 Russian test sets](https://github.com/salute-developers/GigaAM/blob/main/evaluation.md)) — WER %, lower is better:
+
+| | GigaAM v3 e2e-ctc *(what Golos ships)* | Whisper-large-v3 |
+|---|---|---|
+| Average over 10 sets | **12.0** | 21.0 |
+| Golos Farfield | **6.1** | 16.4 |
+| Callcenter | **13.3** | 23.1 |
+
+**Third-party benchmark** ([Habr, 6 public Russian test sets](https://habr.com/ru/articles/1042574/)) — WER %:
+
+| | |
+|---|---|
+| GigaAM v3-e2e-rnnt | **10.38** |
+| `openai/whisper-large-v3-turbo` | 13.25 |
+
+### Where Whisper is better — because it is
+
+The same third-party benchmark is worth reading in full, including the parts that do not
+flatter us:
+
+- On **clean, close-mic speech the two models are tied** (6.98 % vs 7.06 % — the gap is noise).
+- On **noisy, reverberant recordings Whisper wins, by 6–7 points.** Golos is built for a
+  microphone in front of your face, not for a phone on a table in a loud room.
+- That author had earlier published a **3.3 %** WER figure for GigaAM, re-measured it on real
+  recordings, and publicly revised it. We are citing the corrected numbers, not the flattering ones.
+
+If your audio is bad, use Whisper. If you are dictating into your own microphone on a CPU,
+nothing else is close.
+
+---
+
+## Install
+
+Debian, Ubuntu, Mint and relatives:
+
+```bash
+git clone https://github.com/geft1310-hue/golos.git
+cd golos
+./install.sh
+```
+
+That is the whole thing. The installer checks what is missing rather than blindly installing,
+so it usually does not even need your password. It downloads the 215 MB model **once**, and
+offers to start Golos with your session.
+
+```bash
 ./run.sh
 ```
 
-Возле часов появится значок микрофона — значит, всё готово.
+A microphone icon appears in your tray. You're done.
+
+> `install.sh` uses `apt`. On other distributions install the equivalents of
+> `python3-venv python3-gi python3-gi-cairo gir1.2-ayatanaappindicator3-0.1 python3-xlib libportaudio2`
+> with your own package manager, then run `./install.sh` — it will skip straight to the Python parts.
+
+### Using it
+
+1. Put the cursor where you want the text.
+2. **Hold Right <kbd>Ctrl</kbd>.** A small window appears: `● Запись`, a live equaliser, a timer.
+3. Talk.
+4. Let go. `Распознаю…` → `✓ Скопировано`.
+5. <kbd>Ctrl</kbd>+<kbd>V</kbd>.
+
+Talk for as long as you like — long speech is split on natural pauses and stitched back
+together. The hotkey is configurable, as is the microphone, the idle-unload timeout, and an
+optional clipboard auto-wipe.
 
 ---
 
-## Как пользоваться
+## Privacy: what it sees, and what it never does
 
-1. Поставьте курсор туда, куда хотите написать текст.
-2. **Зажмите правый <kbd>Ctrl</kbd>** (тот, что справа от пробела) и не отпускайте.
-3. Внизу экрана появится окошко: `● Запись`, бегущие полоски и таймер.
-4. Говорите.
-5. Отпустите клавишу. Окошко покажет `Распознаю…`, потом `✓ Скопировано`.
-6. Нажмите <kbd>Ctrl</kbd>+<kbd>V</kbd>.
+Every dictation tool claims to respect your privacy. Here is ours, stated as testable
+behaviour — including the uncomfortable part, which is the part nobody else prints.
 
-Полоски в окошке — не украшение. Это проверка, что микрофон вас слышит. Если он
-молчит, надпись честно поменяется на `● Не слышу` — значит, дело в микрофоне,
-а не в распознавании.
+### What it never does
 
-Говорить можно сколько угодно: длинная речь автоматически режется по паузам между
-фразами и склеивается обратно, ничего не теряется. При долгой диктовке в углу
-окошка появится счётчик вида `2/3` — это куски, а не ошибка.
-
-Короткое случайное касание клавиши (меньше трети секунды) игнорируется, чтобы
-программа не дёргалась зря.
-
----
-
-## Значок возле часов
-
-| Пункт меню | Что делает |
+| | Verified by |
 |---|---|
-| **Скопировать последний текст** | Вернуть в буфер то, что распознали до этого |
-| **Настройки…** | См. ниже |
-| **Пауза (не слушать клавишу)** | Отпускает горячую клавишу, чтобы она снова работала как обычная |
-| **Выход** | Закрыть программу |
+| **Never goes online.** Zero network connections while running; only local sockets to screen, audio and tray | `ss -tunp` against the live process |
+| **Never writes your speech to disk.** Audio lives in RAM and the buffer is zeroed right after recognition | [`bench/test_privacy.py`](bench/test_privacy.py) |
+| **Never stores recognised text.** The last ~20 phrases stay in RAM and are wiped on exit | disk-wide search for a marker phrase — not found anywhere |
+| **Never hands text to the clipboard manager for safekeeping.** X11 lets an app ask the clipboard manager to persist a copy so it survives exit — which would put your dictation on disk. Golos deliberately does not make that request | `Gtk.Clipboard.set_text()` with no `store()` |
+| **Never logs your text.** The log records the *length* (`распознано символов: 43`), never the content | — |
+| **Never runs downloaded code.** The model ships as ONNX — a description of a computation, not a program. GigaAM's official loader would execute downloaded Python on your machine; this does not | — |
 
-Во время записи значок меняется — видно, что микрофон включён.
+Model files are pinned to an exact commit and checksummed on every start.
+`~/.config/golos` and `~/.local/share/golos` are created `0700`.
 
-## Настройки
+### What it does see — and you should know this
 
-- **Клавиша для диктовки** — нажмите «Назначить» и нажмите желаемую клавишу.
-  Лучше выбирать клавишу, которая сама по себе ничего не делает: правый Ctrl,
-  правый Alt, клавиша с меню. Обычные буквы назначать не стоит — вы не сможете
-  их печатать.
-- **Микрофон** — если их несколько.
-- **Распознавание** — «с запятыми и заглавными буквами» (по умолчанию) или
-  «чуть быстрее, но без знаков препинания».
-- **Освобождать память после простоя** — через сколько минут выгружать модель из
-  памяти. По умолчанию 5 минут. Выключать не рекомендуется: модель занимает около
-  290 МБ, а при следующем нажатии клавиши она подгружается заранее, пока вы говорите,
-  так что задержки вы не заметите.
-- **Очищать буфер обмена через N секунд** — по умолчанию выключено. Полезно, если
-  диктуете что-то, чему не место в буфере надолго. Чужой скопированный текст
-  программа не тронет — очищается только то, что положила она сама.
-- **Запускать при входе в систему**.
+A global hotkey has to be taken from the whole system. Golos takes it the narrowest way X11
+offers: it asks for **one specific keycode**, not the keystroke stream. This matters, because
+the common shortcut — a `pynput` global listener, used by a lot of similar tools — sees
+*everything you type, including passwords.*
 
----
+But narrow is not the same as isolated, and we measured what actually happens:
 
-## Приватность: что программа видит и чего не делает
+> **While the hotkey is held down, other keystrokes are delivered to Golos and do not reach
+> the focused window.** In the test, three synthetic keypresses arrived at the grab and
+> zero reached the text field.
 
-Написано честно, включая неудобное.
+In practice:
 
-### Не делает
+- **While you hold Right Ctrl, you cannot type.** Letters will not appear in your editor.
+  This is not a bug, it is how an X11 active grab works. Let go and everything is normal.
+- Golos does technically receive those events, so the very first line of the handler
+  **discards anything that isn't the configured keycode** — not stored, not parsed, not logged
+  at any level, debug included.
+- This is true of *every* X11 program with a global hotkey. It is simply not usually written down.
 
-- **Не выходит в интернет.** Проверено на работающей программе: сетевых соединений
-  ноль, открыты только внутренние каналы к экрану, звуку и панели задач.
-  Распознавание целиком локальное.
-- **Не пишет вашу речь на диск.** Звук живёт только в памяти и обнуляется сразу
-  после распознавания. Файлов записи не остаётся.
-- **Не сохраняет распознанный текст.** История последних 20 фраз (для пункта
-  «скопировать последний текст») держится в памяти и стирается при выходе.
-  Проверено поиском по диску: продиктованная фраза-маркер не находится нигде.
-- **Не отдаёт текст менеджеру буфера обмена «на хранение».** В Linux программа может
-  попросить систему запомнить скопированное так, чтобы оно пережило её закрытие —
-  и тогда продиктованное осело бы в истории буфера, то есть на диске. Golos такой
-  запрос не делает намеренно.
-- **Не пишет ваш текст в журнал.** В логи попадает только длина распознанного
-  («распознано символов: 43»), а не сам текст.
-
-### Видит — и это важно понимать
-
-Программе нужна одна клавиша на всю систему, и она берёт её самым узким способом,
-какой есть в X11: просит у системы **конкретно эту клавишу**, а не поток всех нажатий
-(как делают многие подобные программы через библиотеку `pynput` — те видят вообще всё,
-что вы печатаете, включая пароли).
-
-Но полной изоляции здесь не бывает, и вот что показал эксперимент на этой машине:
-
-> **Пока горячая клавиша удерживается, остальные нажатия достаются Golos и до
-> активного окна не доходят.** В проверке из трёх синтезированных нажатий в поле
-> ввода не дошло ни одного, а перехватчик увидел все три.
-
-Что это означает на практике:
-
-- **Пока вы держите правый Ctrl, печатать не получится** — буквы не появятся в окне,
-  куда вы печатаете. Это не поломка, а свойство того, как X11 устроен. Отпустите
-  клавишу — всё сразу работает как обычно.
-- Формально в этот момент программа видит нажатия. Поэтому в коде чужие нажатия
-  отбрасываются **первой же строкой** обработчика: не сохраняются, не разбираются,
-  не логируются ни на каком уровне. Смотреть на них нечему и негде.
-- Окно диктовки при этом ничего не перехватывает — важно, что запись идёт в момент,
-  когда вы говорите, а не печатаете.
-
-Так устроена любая программа с глобальной горячей клавишей под X11 — просто про это
-обычно не пишут. Под Wayland такое в принципе невозможно.
-
-### Откуда взята модель
-
-Файлы модели скачиваются с Hugging Face один раз, из репозитория с **зафиксированным
-номером версии**. При каждом запуске программа сверяет контрольные суммы файлов и
-сообщит, если что-то изменилось.
-
-Формат ONNX выбран сознательно: это описание вычислений, а не программа —
-из него ничего не запускается. Официальный способ загрузки GigaAM выполнял бы
-скачанный python-код на вашем компьютере; здесь этого не происходит.
-
-Папки `~/.config/golos` и `~/.local/share/golos` создаются с правами, при которых
-их не видит никто, кроме вас.
+Reproduce it yourself: [`bench/test_grab_exposure.py`](bench/test_grab_exposure.py).
 
 ---
 
-## Если что-то не работает
+## Requirements, and one real limitation
 
-**Значок не появился, в терминале ругань про клавишу.**
-Правый Ctrl уже занят другой программой. Откройте настройки и назначьте другую
-клавишу — например, правый Alt.
+- **Linux with X11.** Python 3.11+, GTK 3, a microphone.
+- **Wayland will not work**, and this cannot be fixed from our side.
 
-**Окошко появляется, но полоски не двигаются и написано «Не слышу».**
-Дело в микрофоне, не в программе. Проверьте в системных настройках звука, что
-выбран нужный микрофон и он не выключен. В настройках Golos можно выбрать
-конкретное устройство.
+Wayland deliberately does not let an application listen for a key it does not own — that is a
+security feature, not an oversight, and it is the reason global-hotkey tools across the whole
+Linux desktop are in the same position. Golos detects Wayland **at startup** and tells you
+plainly, instead of launching and then silently never responding to the key.
 
-**Первое распознавание после долгого перерыва идёт чуть дольше.**
-Так и задумано: модель освобождает память, когда не используется, и подгружается
-обратно. Загрузка идёт **одновременно с вашей речью**, поэтому обычно вы её не
-замечаете — но если сказать одно короткое слово, задержка будет заметна.
-
-**Написано «Ничего не распознано».**
-Либо было слишком тихо, либо клавишу отпустили раньше, чем начали говорить.
-
-**Хочу временно вернуть обычный правый Ctrl.**
-Значок возле часов → «Пауза». Программа физически отпускает клавишу, а не делает вид.
-
-**Совсем убрать из автозапуска.**
-Настройки → снять «Запускать при входе в систему». Или удалить файл
-`~/.config/autostart/golos.desktop`.
+Ubuntu 22.04+, Fedora and most current GNOME/KDE spins default to Wayland. Log out, click the
+gear icon at the login screen, choose the **Xorg** session, log back in. Nothing else changes.
 
 ---
 
-## Как это работает и сколько стоит по ресурсам
+## Roadmap
 
-Замерено на этой машине (i7-2640M 2011 года, 2 ядра, 8 ГБ памяти — то есть на
-слабом железе; на более новом будет быстрее).
-
-| Что | Сколько |
+| | |
 |---|---|
-| Память, когда программа ждёт | ~65 МБ |
-| Память, когда модель загружена | ~325 МБ |
-| Возвращается системе при выгрузке | 260 из 294 МБ |
-| Загрузка модели с диска | 1.6–2.5 с (успевает, пока вы говорите) |
-| Скорость распознавания | ~0.26 — то есть 10 секунд речи распознаются за 2.6 с |
-| Место на диске | 215 МБ на модель |
+| 🐧 **Linux (X11)** | working, this repo |
+| 🪟 **Windows, with an installer** | in progress |
+| 🤖 **Android — as a voice keyboard** | in progress. Replaces the Google mic button in *any* text field, with punctuation |
+| 🌊 Wayland | blocked upstream; needs a portal that does not exist yet |
 
-Программа — один процесс. Пока вы не нажали клавишу, микрофон **не открыт**, модель
-**не загружена**, и она практически ничего не потребляет.
-
-### Из чего собрано
-
-```
-golos/
-├── __main__.py    связывает всё вместе, главный цикл окон
-├── hotkey.py      перехват клавиши (X11 XGrabKey)
-├── audio.py       микрофон и данные для полосок
-├── asr.py         распознавание, ленивая загрузка, нарезка длинной речи
-├── clipboard.py   буфер обмена и история в памяти
-├── config.py      настройки в ~/.config/golos/config.json
-└── ui/            окошко с эквалайзером, значок, настройки
-```
-
-Тяжёлая работа вынесена в отдельные потоки, окно рисуется отдельно — поэтому
-интерфейс не подвисает во время распознавания.
-
-### Проверки
-
-В папке `bench/` лежат скрипты, которыми всё вышеперечисленное измерялось —
-их можно перезапустить в любой момент:
-
-| Скрипт | Что проверяет |
-|---|---|
-| `benchmark.py` | скорость и память на разных настройках |
-| `test_memory.py` | что память действительно возвращается системе |
-| `test_privacy.py` | что продиктованное не оседает на диске |
-| `test_grab_exposure.py` | куда уходят нажатия во время удержания клавиши |
-| `test_hotkey.py` | что удержание даёт ровно одно нажатие, без автоповтора |
-| `test_audio.py` | что микрофон слышит и полоски считаются верно |
-| `test_overlay.py` | что окошко не ворует фокус |
-
-Запускать так: `.venv/bin/python bench/test_privacy.py`
+Issues and pull requests welcome. If you tried it and it did not work, that is the most
+useful bug report there is — please open it.
 
 ---
 
-Модель GigaAM v3 — [SberDevices](https://github.com/salute-developers/GigaAM), лицензия MIT.
-Запуск без PyTorch — [onnx-asr](https://github.com/istupakov/onnx-asr), лицензия MIT.
+## Credits
+
+Golos is a thin, careful wrapper around other people's excellent work:
+
+- **[GigaAM v3](https://github.com/salute-developers/GigaAM)** — SberDevices, MIT. The model.
+- **[onnx-asr](https://github.com/istupakov/onnx-asr)** — istupakov, MIT. Runs it with numpy and
+  onnxruntime alone, no PyTorch — which is why the whole thing fits in 320 MB.
+
+Golos itself is MIT. Take it, fork it, ship it.
