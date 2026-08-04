@@ -16,8 +16,8 @@ from sample_audio import require_sample
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from golos.asr import Recognizer, find_pauses, split_audio, verify_model_files  # noqa: E402
-from golos.config import Config  # noqa: E402
+from golos.asr import Recognizer, find_pauses, split_audio, verify_model_files
+from golos.config import Config
 
 
 def main() -> int:

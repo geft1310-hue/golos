@@ -6,6 +6,7 @@ keycode горячей клавиши, и вообще посторонним т
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 from dataclasses import asdict, dataclass, fields
@@ -105,7 +106,7 @@ def ensure_dirs() -> None:
     """S7: каталоги приложения — только для владельца."""
     for path in (CONFIG_DIR, DATA_DIR, MODELS_DIR):
         path.mkdir(parents=True, exist_ok=True)
-        try:
+        # Права могут не примениться на сетевой или чужой файловой системе — не беда,
+        # каталог всё равно создан. Ронять из-за этого запуск нельзя.
+        with contextlib.suppress(OSError):
             os.chmod(path, 0o700)
-        except OSError:
-            pass

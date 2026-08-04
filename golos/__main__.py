@@ -127,7 +127,7 @@ class GolosApp:
             self._recognizer.ensure_loaded()
         except ModelFilesMissingError:
             pass  # об этом уже сообщила проверка при старте
-        except Exception:  # noqa: BLE001
+        except Exception:
             log.exception("не удалось загрузить модель заранее")
 
     def _stop_recording(self, held: float) -> bool:
@@ -165,7 +165,7 @@ class GolosApp:
         except ModelFilesMissingError:
             GLib.idle_add(self._fail, "Файлы модели не найдены")
             return
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             log.exception("ошибка распознавания")
             GLib.idle_add(self._fail, f"Не удалось распознать: {type(exc).__name__}")
             return

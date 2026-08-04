@@ -16,8 +16,8 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from golos.asr import Recognizer  # noqa: E402
-from golos.config import Config  # noqa: E402
+from golos.asr import Recognizer
+from golos.config import Config
 
 
 def rss_mb() -> float:
@@ -56,7 +56,8 @@ def main() -> int:
     print()
     print(f"вернули системе: {returned:.1f} МБ из {after_work - base:.1f} МБ")
     print(f"осталось сверх пустого процесса: {held:.1f} МБ")
-    print("ВЫВОД:", "выгрузка работает" if held < 150 else "ПАМЯТЬ НЕ ВЕРНУЛАСЬ — схема не работает")
+    print("ВЫВОД:", "выгрузка работает" if held < 150
+          else "ПАМЯТЬ НЕ ВЕРНУЛАСЬ — схема не работает")
     return 0
 
 

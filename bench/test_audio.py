@@ -15,11 +15,11 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from golos.audio import AudioCapture, AudioError, list_input_devices  # noqa: E402
+from golos.audio import AudioCapture, AudioError, list_input_devices
 
 
 def bar(value: float, width: int = 30) -> str:
-    filled = int(round(value * width))
+    filled = round(value * width)
     return "█" * filled + "·" * (width - filled)
 
 

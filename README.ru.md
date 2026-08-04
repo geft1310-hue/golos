@@ -254,6 +254,7 @@ golos/
 | `test_hotkey.py` | что удержание даёт ровно одно нажатие, без автоповтора |
 | `test_audio.py` | что микрофон слышит и полоски считаются верно |
 | `test_overlay.py` | что окошко не ворует фокус |
+| `test_platform.py` | что X11, Wayland и запуск без экрана различаются верно |
 
 Запускать так: `.venv/bin/python bench/test_privacy.py`
 

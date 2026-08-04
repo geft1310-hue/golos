@@ -24,7 +24,7 @@ import time
 from pathlib import Path
 
 import gi
-from Xlib import X, XK, display
+from Xlib import XK, X, display
 from Xlib.ext import xtest
 
 gi.require_version("Gtk", "3.0")
@@ -78,7 +78,7 @@ def main() -> int:
     listener = HotkeyListener(
         HOTKEY_KEYCODE,
         on_press=lambda: setattr(probe, "presses", probe.presses + 1),
-        on_release=lambda held: setattr(probe, "releases", probe.releases + 1),
+        on_release=lambda _held: setattr(probe, "releases", probe.releases + 1),
     )
     install_spy(listener, probe)
     listener.start()

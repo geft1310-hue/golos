@@ -65,9 +65,8 @@ def dir_size_mb(path: Path) -> float:
 
 def run_single(model_name: str, threads: int, wav_path: Path) -> dict:
     """Один прогон в собственном процессе. Печатает JSON в stdout."""
-    import onnxruntime as ort
-
     import onnx_asr
+    import onnxruntime as ort
 
     waveform, sample_rate = read_wav_mono_f32(wav_path)
     duration = len(waveform) / sample_rate
@@ -211,7 +210,7 @@ def main() -> int:
             print(f"→ {model_name}, {threads} потока...", flush=True)
             proc = subprocess.run(
                 [sys.executable, __file__, str(wav_path), "--single", model_name, str(threads)],
-                capture_output=True, text=True,
+                capture_output=True, text=True, check=False,
             )
             line = next((ln for ln in proc.stdout.splitlines()
                          if ln.startswith("@@JSON@@")), None)

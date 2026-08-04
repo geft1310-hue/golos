@@ -1,0 +1,78 @@
+# Проверки на каждый push и на каждую присланную правку.
+#
+# Что здесь НЕ проверяется и почему: само распознавание. Модель весит 215 МБ, качать
+# её на каждый прогон — минуты ожидания и трафик впустую. Скорость и качество меряются
+# на живой машине через bench/benchmark.py, а сюда попадает только то, что ломается
+# от опечаток и невнимательности: импорты, стиль, определение сеанса и обещания
+# про приватность.
+
+name: Проверки
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    # Версия закреплена намеренно: "latest" однажды переедет на новый Ubuntu,
+    # и сборка покраснеет не из-за правки, а из-за смены раннера.
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Системные пакеты
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            python3-venv python3-gi python3-gi-cairo \
+            gir1.2-gtk-3.0 gir1.2-ayatanaappindicator3-0.1 \
+            python3-xlib libportaudio2 xvfb
+
+      - name: Окружение
+        # --system-site-packages как в install.sh: GTK и python-xlib берутся из системы,
+        # собирать их через pip незачем. Ставим ровно то же, что получит пользователь.
+        run: |
+          python3 -m venv --system-site-packages .venv
+          .venv/bin/python -m pip install --quiet --upgrade pip
+          .venv/bin/python -m pip install --quiet -r requirements.lock.txt
+          .venv/bin/python -m pip install --quiet ruff==0.16.1
+
+      - name: Стиль
+        run: .venv/bin/ruff check --output-format github .
+
+      - name: Компиляция
+        run: .venv/bin/python -m compileall -q golos tools bench
+
+      - name: Все модули импортируются
+        # Экран нужен только для того, чтобы GTK не ругался на его отсутствие;
+        # окон здесь никто не открывает.
+        run: |
+          xvfb-run -a .venv/bin/python -c "
+          import golos.__main__, golos.asr, golos.audio, golos.clipboard
+          import golos.config, golos.hotkey, golos.platform_check
+          import golos.ui.overlay, golos.ui.settings, golos.ui.tray
+          print('все модули импортируются')
+          "
+
+      - name: Сеанс определяется верно (X11 / Wayland / без экрана)
+        run: .venv/bin/python bench/test_platform.py
+
+      - name: Установщик — синтаксис
+        run: bash -n install.sh && bash -n run.sh
+
+      - name: В репозитории нет ни чужого голоса, ни весов моделей
+        # Обещание из README, проверяемое машиной. Записи речи — это живой голос
+        # человека, и однажды попав в историю git, они оттуда уже не убираются.
+        run: |
+          found=$(git ls-files | grep -E '\.(wav|mp3|ogg|flac|onnx|onnx_data)$' || true)
+          if [ -n "$found" ]; then
+            echo "::error::В репозиторий попали файлы, которых там быть не должно:"
+            echo "$found"
+            exit 1
+          fi
+          echo "чисто"

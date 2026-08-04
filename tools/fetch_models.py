@@ -22,6 +22,7 @@ S7: права 0700 выставляются после скачивания.
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import os
@@ -83,10 +84,8 @@ def sha256_of(path: Path) -> str:
 def harden(path: Path) -> None:
     """S7: ничего лишнего для группы и остальных."""
     for p in [path, *path.rglob("*")]:
-        try:
+        with contextlib.suppress(OSError):
             os.chmod(p, 0o700 if p.is_dir() else 0o600)
-        except OSError:
-            pass
 
 
 def fetch(model_name: str) -> int:
@@ -145,7 +144,7 @@ def fix_socks_proxy() -> None:
     if not any(os.environ.get(v, "").startswith("socks") for v in ("ALL_PROXY", "all_proxy")):
         return
     try:
-        import socksio  # noqa: F401, PLC0415
+        import socksio  # noqa: F401
     except ImportError:
         if not (os.environ.get("https_proxy") or os.environ.get("HTTPS_PROXY")):
             print("ВНИМАНИЕ: задан SOCKS-прокси, но нет socksio и нет https_proxy —"

@@ -19,12 +19,14 @@ import sys
 import time
 from pathlib import Path
 
-from Xlib import X, display as xdisplay, error as xerror
+from Xlib import X
+from Xlib import display as xdisplay
+from Xlib import error as xerror
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from golos.config import Config  # noqa: E402
-from golos.hotkey import keycode_label  # noqa: E402
+from golos.config import Config
+from golos.hotkey import keycode_label
 
 
 def main() -> int:

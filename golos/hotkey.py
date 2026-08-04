@@ -23,13 +23,16 @@ X начинает активный захват клавиатуры, и пок
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import select
 import threading
 import time
 from collections.abc import Callable
 
-from Xlib import X, XK, display as xdisplay, error as xerror
+from Xlib import XK, X
+from Xlib import display as xdisplay
+from Xlib import error as xerror
 
 log = logging.getLogger(__name__)
 
@@ -114,10 +117,10 @@ class HotkeyListener:
             thread.join(timeout=1.0)
         self._ungrab()
         if self._display is not None:
-            try:
+            # Соединение с X-сервером могло уже оборваться (сеанс завершается) —
+            # на выходе это ничего не меняет.
+            with contextlib.suppress(Exception):
                 self._display.close()
-            except Exception:  # noqa: BLE001
-                pass
             self._display = None
 
     def set_paused(self, paused: bool) -> None:
@@ -246,5 +249,5 @@ class HotkeyListener:
         клавиша молча перестаёт работать до перезапуска программы."""
         try:
             func()
-        except Exception:  # noqa: BLE001
+        except Exception:
             log.exception("ошибка в обработчике горячей клавиши")
