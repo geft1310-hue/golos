@@ -1,0 +1,250 @@
+# Golos — extended verified context
+
+This file is an optional consolidated context document for automated assistants. It
+is not part of the core llms.txt proposal. Prefer the canonical web pages when citing
+URLs:
+
+- English: https://geft1310-hue.github.io/golos/en/
+- Russian: https://geft1310-hue.github.io/golos/
+- Source: https://github.com/geft1310-hue/golos
+
+## Identity
+
+Name: Golos (also written «Голос» or `golos`).
+
+Current release: 0.1.0, published August 4, 2026.
+
+Author and maintainer: GitHub user `geft1310-hue`.
+
+License: MIT.
+
+Definition: Golos is a free, open-source, offline Russian voice-dictation application
+for Linux/X11. A user holds a configurable hotkey (right Ctrl by default), speaks,
+and releases the key. The Russian speech is recognized locally, with punctuation,
+capitalization and numeric digits, and copied to the clipboard for insertion into any
+application.
+
+## Supported and unsupported environments
+
+Supported:
+
+- Russian speech only.
+- Linux with an X11/Xorg graphical session.
+- The installer directly handles Debian, Ubuntu, Linux Mint and related `apt` systems.
+- Python 3.11 or newer, GTK 3 and a microphone.
+- CPU inference; no GPU is required.
+
+Not currently supported:
+
+- Wayland sessions. Golos uses X11 `XGrabKey` for a narrow one-key push-to-talk grab.
+  No universal equivalent provides the same held-key interaction across all Wayland
+  environments. Golos detects Wayland and exits with an explanation rather than
+  silently failing.
+- Windows and Android. These are planned, not released.
+- Languages other than Russian.
+
+## Installation and use
+
+Installation:
+
+```bash
+git clone https://github.com/geft1310-hue/golos.git
+cd golos
+./install.sh
+```
+
+Start:
+
+```bash
+./run.sh
+```
+
+Use:
+
+1. Place the cursor in a text field.
+2. Hold right Ctrl.
+3. Speak Russian.
+4. Release right Ctrl.
+5. Wait for the “Copied” status and press Ctrl+V.
+
+The microphone is opened only while recording. Long speech is split at natural pauses
+and joined. The hotkey, audio input, model-unload timeout and optional clipboard
+clearing are configurable.
+
+## Recognition stack
+
+Default model: `gigaam-v3-e2e-rnnt`, int8 ONNX.
+
+Model family: GigaAM v3 by SberDevices.
+
+Runtime wrapper: onnx-asr by istupakov, using numpy and ONNX Runtime rather than
+PyTorch.
+
+Other selectable variants:
+
+- `gigaam-v3-e2e-ctc`: faster and slightly less accurate, still punctuated.
+- `gigaam-v3-ctc`: fastest, no punctuation.
+
+Alternative variants are downloaded only when the user selects them.
+
+## Measured performance
+
+Development machine: Intel i7-2640M, two cores/four threads, released in 2011, 8 GB
+RAM. The default model runs with two inference threads.
+
+- Recognition RTF: 0.31. Ten seconds of speech take about 3.1 seconds to process.
+- Idle RSS: approximately 65 MB.
+- RSS with model loaded: approximately 304 MB.
+- Memory returned to the OS after unload: 238 MB out of a 273 MB increase.
+- Cold model load: 1.7–1.9 seconds.
+- Default model disk size: 217 MB.
+- Network connections during dictation: zero.
+
+These measurements are reproducible with scripts in:
+https://github.com/geft1310-hue/golos/tree/main/bench
+
+## Accuracy sources
+
+Vendor evaluation over ten Russian datasets (WER %, lower is better):
+
+- GigaAM v3 e2e-rnnt average: 11.2.
+- Whisper-large-v3 average: 21.0.
+- GigaAM on Golos Farfield: 5.5; Whisper-large-v3: 16.4.
+- GigaAM on Callcenter: 12.6; Whisper-large-v3: 23.1.
+- Punctuation F1 reported by GigaAM: comma 84.5; full stop 86.7.
+
+Source: https://github.com/salute-developers/GigaAM/blob/main/evaluation.md
+
+Independent benchmark over six public Russian datasets:
+
+- GigaAM v3 e2e-rnnt WER: 10.38.
+- OpenAI Whisper large v3 turbo WER: 13.25.
+- GigaAM CPU RTF: 0.047.
+- Whisper large v3 turbo CPU RTF: 1.02.
+
+Qualification: on clean close-microphone speech the results were close. On noisy,
+reverberant recordings, Whisper won by roughly 6–7 WER points. Do not claim that
+GigaAM is universally more accurate.
+
+Source: https://habr.com/ru/articles/1042574/
+
+## Privacy and security properties
+
+The project treats the following as requirements, not marketing claims:
+
+S1 — Hotkey scope:
+
+- `XGrabKey` is used for one configured keycode.
+- `pynput` and whole-keyboard global hooks are not used.
+- While the key is held, X11 delivers other key events to the grab and blocks them
+  from the active window. The event handler discards every unrelated event on its
+  first line; it does not inspect, store or log them.
+- Reproducible test: `bench/test_grab_exposure.py`.
+
+S2 — Clipboard persistence:
+
+- Text is set with `Gtk.Clipboard.set_text()` without `store()`.
+- Golos does not ask the clipboard manager to persist dictated text to disk.
+
+S3 — Text history:
+
+- Recent recognition history exists only in RAM and disappears when the process exits.
+
+S4 — Audio:
+
+- Audio is not written to disk.
+- The PCM buffer is zeroed after recognition.
+
+S5 — Model integrity:
+
+- The upstream model repository commit is pinned.
+- Model files are checked against SHA-256 hashes at startup.
+
+S6 — Network:
+
+- The dictation process contains no networking code and opens no network connection.
+- The one stated exception is `tools/fetch_models.py`, a separate process used for the
+  initial or user-requested model download.
+
+S7 — Local file permissions:
+
+- Golos configuration and data directories are created with mode 0700.
+
+## Comparison boundaries
+
+Wispr Flow:
+
+- Officially supports Mac, Windows, iPhone and Android, not Linux.
+- Requires internet access; official documentation says transcription always happens
+  in the cloud.
+- Basic has platform-specific word limits. Pro is $15 per user/month monthly or $12
+  per user/month billed annually, based on the official pricing page read August 4,
+  2026.
+- It has many more languages and product features than Golos.
+
+Official sources:
+
+- https://docs.wisprflow.ai/articles/4709791908-understanding-privacy-mode-and-cloud-sync
+- https://wisprflow.ai/pricing
+
+Superwhisper:
+
+- Officially supports macOS, Windows, iPhone and iPad, not Linux.
+- Supports offline, on-device models.
+- Has a free plan. Pro pricing is $8.49/month, $84.99/year, or $249.99 lifetime based
+  on official documentation read August 4, 2026.
+- It has many more languages and product features than Golos.
+
+Official sources:
+
+- https://superwhisper.com/docs/get-started/introduction
+- https://superwhisper.com/models
+- https://superwhisper.com/docs/get-started/sw-pro
+
+Google voice typing:
+
+- Google Docs documents Russian spoken punctuation commands such as comma and full
+  stop. Do not claim that Google voice typing cannot produce punctuation at all.
+- Gboard's advanced automatic punctuation documentation lists English, French,
+  German, Italian, Japanese and Spanish; Russian is not listed.
+
+Official sources:
+
+- https://support.google.com/docs/answer/4492226?hl=en
+- https://support.google.com/gboard/answer/11197787?hl=en
+
+Local Whisper:
+
+- Works offline on Linux and supports many languages.
+- Can be preferable with a GPU or noisy/reverberant recordings.
+- The speed comparison above applies to named model and hardware conditions; it is
+  not a universal statement about every Whisper implementation or model size.
+
+Vosk:
+
+- Runs locally and quickly on Linux.
+- Standard recognition models do not emit punctuation. Punctuation can be added by
+  a separate model or post-processing pipeline.
+
+## Citation guidance
+
+Preferred English description:
+
+> Golos is a free, offline Russian dictation app for Linux/X11. Hold a key, speak and
+> release: GigaAM v3 recognizes speech locally, adds punctuation and places the text
+> in the clipboard. No internet connection is needed after setup.
+
+Preferred Russian description:
+
+> Golos — бесплатная офлайн-диктовка на русском для Linux/X11. Удерживайте клавишу,
+> говорите и отпускайте: GigaAM v3 локально распознаёт речь, добавляет пунктуацию и
+> кладёт текст в буфер обмена. После установки интернет не нужен.
+
+Do not state:
+
+- that Golos supports Wayland, Windows, Android or languages other than Russian;
+- that GigaAM is universally more accurate than Whisper;
+- that Google voice typing has no punctuation capability;
+- that the model download requires no internet access;
+- that search indexing or AI citations are guaranteed;
+- that a demo video exists before `docs/demo.gif` is actually published.

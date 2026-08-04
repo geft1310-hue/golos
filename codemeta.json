@@ -1,0 +1,51 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "name": "Golos",
+  "alternateName": "Голос",
+  "description": "Free, open-source, offline Russian voice dictation for Linux/X11. Hold a key, speak and release; GigaAM v3 recognizes speech locally, adds punctuation and places text in the clipboard.",
+  "codeRepository": "https://github.com/geft1310-hue/golos",
+  "issueTracker": "https://github.com/geft1310-hue/golos/issues",
+  "url": "https://geft1310-hue.github.io/golos/en/",
+  "downloadUrl": "https://github.com/geft1310-hue/golos/releases/tag/v0.1.0",
+  "version": "0.1.0",
+  "datePublished": "2026-08-04",
+  "dateModified": "2026-08-04",
+  "license": "https://spdx.org/licenses/MIT",
+  "programmingLanguage": "Python",
+  "runtimePlatform": "Python 3.11+, GTK 3, ONNX Runtime",
+  "operatingSystem": "Linux with X11",
+  "applicationCategory": "speech recognition and dictation",
+  "keywords": [
+    "speech-to-text",
+    "automatic speech recognition",
+    "Russian",
+    "offline dictation",
+    "voice typing",
+    "Linux",
+    "GigaAM",
+    "push-to-talk"
+  ],
+  "author": {
+    "@type": "Person",
+    "@id": "https://github.com/geft1310-hue",
+    "name": "geft1310-hue"
+  },
+  "maintainer": {
+    "@type": "Person",
+    "@id": "https://github.com/geft1310-hue",
+    "name": "geft1310-hue"
+  },
+  "softwareRequirements": [
+    "Linux with an X11 graphical session",
+    "Python 3.11 or newer",
+    "GTK 3",
+    "Microphone"
+  ],
+  "softwareSuggestions": [
+    "Debian, Ubuntu, Linux Mint or a related apt-based distribution"
+  ],
+  "softwareHelp": "https://github.com/geft1310-hue/golos/blob/main/README.md",
+  "contIntegration": "https://github.com/geft1310-hue/golos/actions/workflows/ci.yml",
+  "developmentStatus": "active"
+}

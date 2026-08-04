@@ -2,13 +2,31 @@
 
 **Hold a key. Talk. Let go. The text is in your clipboard — with the commas already in it.**
 
-Offline Russian speech-to-text for Linux. Your voice never leaves the machine.
-After the one-time model download you can unplug the network cable and it keeps working.
-
-🇷🇺 [Читать по-русски](README.ru.md)
+[Website](https://geft1310-hue.github.io/golos/en/) ·
+[Русский](https://geft1310-hue.github.io/golos/) ·
+[Plain Markdown overview](https://geft1310-hue.github.io/golos/overview.en.md) ·
+[llms.txt](https://geft1310-hue.github.io/golos/llms.txt)
 
 [![Checks](https://github.com/geft1310-hue/golos/actions/workflows/ci.yml/badge.svg)](https://github.com/geft1310-hue/golos/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+## What is Golos?
+
+**Golos is a free, open-source, offline Russian voice-dictation app for Linux/X11.**
+Hold the right Ctrl key, speak Russian and release it: GigaAM v3 recognizes the speech
+locally, adds punctuation, capitalization and numeric digits, and puts the text in your
+clipboard. After the one-time model download, no internet connection, GPU, account or
+subscription is required. Speech and recognized text are not written to disk.
+
+| | |
+|---|---|
+| **Best for** | Russian push-to-talk dictation on a Linux CPU |
+| **Platform** | Linux with X11; Debian/Ubuntu/Mint installer |
+| **Recognition** | GigaAM v3 e2e-rnnt, ONNX int8, Russian only |
+| **Measured speed** | RTF 0.31 on a 2011 two-core i7-2640M |
+| **Resources** | 217 MB disk; ~65 MB idle / ~304 MB loaded RAM |
+| **Privacy** | local inference; zero connections during dictation; no audio or text persisted |
+| **Price / license** | free, MIT |
 
 > **Scope, up front:** Golos recognises **Russian only**, and runs on **Linux/X11** today.
 > Windows and Android are on the roadmap. If you need another language, this is not your tool —
@@ -20,11 +38,14 @@ After the one-time model download you can unplug the network cable and it keeps 
 
 Dictation that actually feels good is a solved problem — if you are willing to accept all three of these:
 
-| The usual deal | |
+| The usual compromise | Example |
 |---|---|
-| 💸 **Paid, forever** | Wispr Flow, Superwhisper and friends are subscriptions |
-| 🍎 **macOS only** | on Linux there is essentially nothing comparable |
-| ☁️ **Cloud** | every word you dictate is processed on someone else's computer |
+| 💸 **A subscription or product limits** | Wispr Flow has weekly limits on its free plan; Superwhisper's advanced features are paid |
+| 🐧 **No official Linux app** | Wispr Flow and Superwhisper support other desktop/mobile platforms, not Linux |
+| ☁️ **Cloud transcription** | Wispr Flow requires internet access and always transcribes in the cloud |
+
+Superwhisper is a useful counterexample to the cloud problem: it supports local models, but not
+Linux. Golos is narrower — Russian and Linux/X11 only — and fully local after setup.
 
 The obvious escape is Whisper, running locally. For Russian, that escape has a catch that
 nobody mentions until you try it:
@@ -49,16 +70,16 @@ And it punctuates. That matters more than it sounds.
 
 ## Why Russian speakers should care
 
-If you have ever used the microphone button on an Android keyboard, you know the output:
+Standard Russian voice typing often relies on spoken punctuation commands such as “comma” and
+“full stop.” Google's own documentation lists those Russian commands, while Gboard's advanced
+automatic-punctuation feature officially lists several other languages but not Russian. Without
+spoken commands, input can look like this:
 
 ```
 привет как дела я сегодня буду в офисе часов в пять давай встретимся
 ```
 
-One long breathless line. No commas, no full stops, no capitals, numbers spelled out as words.
-You then spend as long fixing it as you would have spent typing it.
-
-Golos gives you this instead:
+Golos adds punctuation without spoken commands and gives you this instead:
 
 ```
 Привет, как дела? Я сегодня буду в офисе часов в 5. Давай встретимся.
@@ -67,6 +88,10 @@ Golos gives you this instead:
 Punctuation, capitalisation and digits are not a post-processing hack bolted on afterwards —
 the model emits them natively, as part of recognition. The vendor's own evaluation puts comma
 F1 at **84.5** and full-stop F1 at **86.7**.
+
+Sources: [Google Docs voice typing](https://support.google.com/docs/answer/4492226?hl=en),
+[Gboard advanced voice typing](https://support.google.com/gboard/answer/11197787?hl=en),
+[GigaAM evaluation](https://github.com/salute-developers/GigaAM/blob/main/evaluation.md).
 
 ---
 
@@ -224,15 +249,44 @@ Reproduce it yourself: [`bench/test_grab_exposure.py`](bench/test_grab_exposure.
 ## Requirements, and one real limitation
 
 - **Linux with X11.** Python 3.11+, GTK 3, a microphone.
-- **Wayland will not work**, and this cannot be fixed from our side.
+- **The current version does not work on Wayland.**
 
-Wayland deliberately does not let an application listen for a key it does not own — that is a
-security feature, not an oversight, and it is the reason global-hotkey tools across the whole
-Linux desktop are in the same position. Golos detects Wayland **at startup** and tells you
-plainly, instead of launching and then silently never responding to the key.
+Golos relies on X11 `XGrabKey` for a narrow one-key push-to-talk grab. There is currently no
+universal equivalent that provides the same held-global-key interaction across all Wayland
+desktops. Golos detects Wayland **at startup** and explains the limitation instead of launching
+and silently ignoring the key.
 
-Ubuntu 22.04+, Fedora and most current GNOME/KDE spins default to Wayland. Log out, click the
-gear icon at the login screen, choose the **Xorg** session, log back in. Nothing else changes.
+Ubuntu, Fedora and many current GNOME/KDE installations default to Wayland. Log out, click the
+gear icon at the login screen, choose an **Xorg** session, and log back in.
+
+---
+
+## Quick questions
+
+### Does offline Russian dictation need a GPU?
+
+No. Golos runs on a CPU. The published RTF 0.31 measurement comes from a two-core laptop CPU
+released in 2011.
+
+### Is speech uploaded or stored?
+
+No. Recognition runs locally, PCM audio is zeroed after recognition, and recognized text is kept
+only in RAM. A separate downloader uses the network once to fetch the model.
+
+### How is Golos different from Wispr Flow and Superwhisper?
+
+Wispr Flow always transcribes in the cloud and does not support Linux. Superwhisper supports local
+models but also has no Linux version. Golos is free, local and Linux/X11-native, but deliberately
+supports only Russian and has fewer features. See the [sourced comparison](https://geft1310-hue.github.io/golos/en/#comparison).
+
+### Why GigaAM instead of Whisper?
+
+For interactive Russian dictation on a CPU, GigaAM is much faster in the cited independent test.
+Whisper remains a better fit for multiple languages, GPU systems and some noisy recordings.
+
+More machine-readable facts: [English overview](https://geft1310-hue.github.io/golos/overview.en.md) ·
+[llms.txt](https://geft1310-hue.github.io/golos/llms.txt) ·
+[extended context](https://geft1310-hue.github.io/golos/llms-full.txt).
 
 ---
 

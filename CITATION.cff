@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If Golos is useful in your work, please cite the software using these metadata."
+title: "Golos: offline Russian voice dictation for Linux"
+type: software
+version: 0.1.0
+date-released: 2026-08-04
+license: MIT
+repository-code: "https://github.com/geft1310-hue/golos"
+url: "https://geft1310-hue.github.io/golos/en/"
+authors:
+  - name: "geft1310-hue"
+    alias: "geft1310-hue"
+    website: "https://github.com/geft1310-hue"
+keywords:
+  - speech-to-text
+  - automatic speech recognition
+  - Russian
+  - offline dictation
+  - voice typing
+  - Linux
+  - GigaAM
+abstract: >-
+  Golos is a free, open-source, offline Russian voice-dictation application for
+  Linux/X11. It uses GigaAM v3 through ONNX Runtime, adds punctuation as part of
+  recognition, and places the resulting text in the clipboard. Recognition runs
+  locally without a GPU or network connection after the one-time model download.

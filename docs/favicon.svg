@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Golos microphone">
+  <rect width="64" height="64" rx="14" fill="#c8352c"/>
+  <g fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="24" y="11" width="16" height="29" rx="8"/>
+    <path d="M17 34a15 15 0 0 0 30 0M32 49v8M24 57h16"/>
+  </g>
+</svg>

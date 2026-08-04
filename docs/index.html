@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Golos — голосовой ввод текста офлайн для Linux</title>
+<meta name="description" content="Бесплатная офлайн-диктовка на русском для Linux/X11: удерживайте клавишу, говорите, отпустите — текст со знаками препинания уже в буфере обмена.">
+<link rel="canonical" href="https://geft1310-hue.github.io/golos/">
+<link rel="alternate" hreflang="ru" href="https://geft1310-hue.github.io/golos/">
+<link rel="alternate" hreflang="en" href="https://geft1310-hue.github.io/golos/en/">
+<link rel="alternate" hreflang="x-default" href="https://geft1310-hue.github.io/golos/en/">
+<meta name="author" content="geft1310-hue">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Golos">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:url" content="https://geft1310-hue.github.io/golos/">
+<meta property="og:title" content="Golos — голосовой ввод текста офлайн для Linux">
+<meta property="og:description" content="Зажали клавишу, сказали, отпустили — текст со знаками препинания в буфере обмена. Бесплатно, без облака и подписки.">
+<meta property="og:image" content="https://geft1310-hue.github.io/golos/og.png">
+<meta property="og:image:secure_url" content="https://geft1310-hue.github.io/golos/og.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Golos — бесплатный голосовой ввод текста офлайн для Linux">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Golos — голосовой ввод текста офлайн для Linux">
+<meta name="twitter:description" content="Зажали клавишу, сказали, отпустили — текст со знаками препинания в буфере обмена. Без интернета и подписки.">
+<meta name="twitter:image" content="https://geft1310-hue.github.io/golos/og.png">
+<meta name="twitter:image:alt" content="Golos — бесплатный голосовой ввод текста офлайн для Linux">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="s.css">
+</head>
+<body>
+<header>
+  <p class="lang">🇬🇧 <a href="en/" hreflang="en">In English</a></p>
+  <h1>Golos — голосовой ввод текста офлайн</h1>
+  <p class="tagline">Зажали клавишу. Сказали. Отпустили. Текст уже в буфере обмена — вместе с запятыми.</p>
+  <p>
+    <a class="cta" href="#ustanovka">Установить</a>
+    <a class="cta ghost" href="https://github.com/geft1310-hue/golos">Исходный код на GitHub</a>
+  </p>
+</header>
+
+<main>
+  <!-- Сюда встанет docs/demo.gif, когда пользователь снимет живой ролик. -->
+  <section class="summary" aria-labelledby="chto-takoe">
+    <h2 id="chto-takoe">Что такое Golos</h2>
+    <p><strong>Golos</strong> (по-русски «Голос») — бесплатная программа с открытым исходным кодом
+    для голосового ввода текста на русском языке в Linux. Вы удерживаете правый <kbd>Ctrl</kbd>,
+    говорите, отпускаете — распознанный текст оказывается в буфере обмена, и его можно вставить
+    куда угодно через <kbd>Ctrl</kbd>+<kbd>V</kbd>. Распознавание работает
+    <strong>целиком на вашем компьютере</strong>: после однократной установки интернет не нужен,
+    речь никуда не отправляется и на диск не записывается.</p>
+    <p>Внутри — <strong>GigaAM v3</strong>, русскоязычная модель распознавания речи от SberDevices,
+    запускаемая через ONNX Runtime без PyTorch. Модель сама ставит знаки препинания и заглавные
+    буквы, а числа записывает цифрами. Golos работает в Linux с X11, распространяется по лицензии
+    MIT и не требует видеокарты, регистрации или подписки.</p>
+  </section>
+
+  <section aria-labelledby="korotko">
+    <h2 id="korotko">Коротко о главном</h2>
+    <div class="scroll">
+      <table>
+        <tbody>
+          <tr><th scope="row">Что делает</th><td>переводит русскую речь в текст и кладёт его в буфер обмена</td></tr>
+          <tr><th scope="row">Где работает</th><td>Linux с графическим сервером X11; установщик рассчитан на Debian, Ubuntu, Mint и родственные системы</td></tr>
+          <tr><th scope="row">Нужен ли интернет</th><td>только один раз при установке, чтобы скачать модель; для распознавания — нет</td></tr>
+          <tr><th scope="row">Нужна ли видеокарта</th><td>нет, всё считается на обычном процессоре</td></tr>
+          <tr><th scope="row">Сколько стоит</th><td>бесплатно; открытый исходный код под лицензией MIT, без регистрации и подписки</td></tr>
+          <tr><th scope="row">Язык</th><td>только русский</td></tr>
+          <tr><th scope="row">Пунктуация</th><td>автоматически: запятые, точки, вопросительные знаки, заглавные буквы и числа цифрами</td></tr>
+          <tr><th scope="row">Скорость</th><td>RTF 0.31: десять секунд речи распознаются за 3.1 секунды на процессоре 2011 года</td></tr>
+          <tr><th scope="row">Место на диске</th><td>217 МБ — модель распознавания</td></tr>
+          <tr><th scope="row">Оперативная память</th><td>около 65 МБ в ожидании, около 304 МБ с загруженной моделью</td></tr>
+          <tr><th scope="row">Модель</th><td>GigaAM v3 e2e-rnnt, ONNX int8, через <a href="https://github.com/istupakov/onnx-asr">onnx-asr</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="zachem">
+    <h2 id="zachem">Зачем это нужно</h2>
+    <p>Обычный русский голосовой ввод часто заставляет проговаривать команды вроде «запятая» и
+    «точка». Например, справка Google подтверждает русские голосовые команды для пунктуации, но
+    расширенная автоматическая пунктуация Gboard официально перечисляет лишь несколько других языков,
+    без русского. Golos расставляет знаки сам, без произнесённых команд.</p>
+    <p>Вместо:</p>
+    <pre><code>привет как дела я сегодня буду в офисе часов в пять давай встретимся</code></pre>
+    <p>получается:</p>
+    <pre><code>Привет, как дела? Я сегодня буду в офисе часов в 5. Давай встретимся.</code></pre>
+    <p>Знаки не добавляются отдельным скриптом после распознавания — модель выдаёт их как часть
+    результата. В оценке авторов GigaAM F1 для запятой составляет <strong>84.5</strong>, для точки —
+    <strong>86.7</strong>.</p>
+    <p class="sources">Источники: <a href="https://support.google.com/docs/answer/4492226?hl=ru">голосовой ввод Google Документов</a>,
+    <a href="https://support.google.com/gboard/answer/11197787?hl=ru">расширенный голосовой ввод Gboard</a>,
+    <a href="https://github.com/salute-developers/GigaAM/blob/main/evaluation.md">оценка GigaAM</a>.</p>
+
+    <h3>Почему не Whisper</h3>
+    <p>Очевидный ответ на «хочу распознавание без облака» — Whisper от OpenAI, запущенный локально.
+    Для русской диктовки на одном процессоре у этого пути есть подвох: модель может распознавать
+    медленнее реального времени. В независимом замере <code>whisper-large-v3-turbo</code> показал
+    RTF 1.02 на CPU — десять секунд речи обрабатываются немного дольше десяти секунд. GigaAM v3
+    e2e-rnnt в том же замере показал <strong>RTF 0.047 — более чем в 20 раз быстрее</strong>, при
+    сопоставимой средней точности на русском. Golos использует меньшую русскоязычную модель, поэтому
+    работает без видеокарты.</p>
+    <p class="sources">Источник: <a href="https://habr.com/ru/articles/1042574/">независимый сравнительный замер русских ASR-моделей</a>.</p>
+  </section>
+
+  <section aria-labelledby="ustanovka">
+    <h2 id="ustanovka">Установка</h2>
+    <p>Debian, Ubuntu, Linux Mint и родственные дистрибутивы. Откройте терминал
+    (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>T</kbd>), вставьте три строки и нажмите Enter:</p>
+    <pre><code>git clone https://github.com/geft1310-hue/golos.git
+cd golos
+./install.sh</code></pre>
+    <p>Установщик проверяет, чего не хватает, вместо того чтобы ставить всё подряд. Модель весом
+    217 МБ скачивается <strong>один раз</strong>. В конце установщик предложит запускать Golos вместе
+    с системой.</p>
+    <pre><code>./run.sh</code></pre>
+    <p>Возле часов появится значок микрофона — всё готово.</p>
+  </section>
+
+  <section aria-labelledby="kak-polzovatsya">
+    <h2 id="kak-polzovatsya">Как пользоваться</h2>
+    <ol>
+      <li>Поставьте курсор туда, где хотите получить текст.</li>
+      <li>Зажмите правый <kbd>Ctrl</kbd>. Внизу экрана появятся <code>● Запись</code>, полоски
+        уровня звука и таймер.</li>
+      <li>Говорите.</li>
+      <li>Отпустите клавишу. Окошко покажет <code>Распознаю…</code>, затем
+        <code>✓ Скопировано</code>.</li>
+      <li>Нажмите <kbd>Ctrl</kbd>+<kbd>V</kbd>.</li>
+    </ol>
+    <p>Текст вставляется в любую программу, где есть поле ввода: браузер, письмо, мессенджер,
+    текстовый редактор. Длинная речь режется по естественным паузам и склеивается обратно. Горячую
+    клавишу, микрофон, время выгрузки модели и автоочистку буфера можно поменять в настройках.</p>
+  </section>
+
+  <section aria-labelledby="sravnenie">
+    <h2 id="sravnenie">Сравнение с другими способами диктовать</h2>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th scope="col">Способ</th><th scope="col">Офлайн</th><th scope="col">Linux</th><th scope="col">Русская пунктуация</th><th scope="col">Цена</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Golos</th><td class="yes">да</td><td class="yes">да, X11</td><td class="yes">автоматически</td><td>бесплатно, MIT</td></tr>
+          <tr><th scope="row">Google Docs / обычный Gboard</th><td>облачные функции зависят от интернета</td><td>Google Docs — через браузер</td><td>есть произносимые команды; расширенная автопунктуация русского не заявлена</td><td>бесплатно</td></tr>
+          <tr><th scope="row"><a href="https://wisprflow.ai/">Wispr Flow</a></th><td>нет, распознавание всегда в облаке</td><td>нет; Mac, Windows, iPhone, Android</td><td>да</td><td>бесплатный лимит; Pro 15 $/месяц или 12 $/месяц при годовой оплате</td></tr>
+          <tr><th scope="row"><a href="https://superwhisper.com/">Superwhisper</a></th><td>да, с локальными моделями</td><td>нет; macOS, Windows, iPhone, iPad</td><td>да</td><td>есть бесплатный план; Pro от 8.49 $/месяц</td></tr>
+          <tr><th scope="row">Whisper / whisper.cpp локально</th><td class="yes">да</td><td class="yes">да</td><td>да</td><td>бесплатно</td></tr>
+          <tr><th scope="row">Vosk</th><td class="yes">да</td><td class="yes">да</td><td>обычные модели не выдают пунктуацию</td><td>бесплатно</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Golos отличается от локального Whisper прежде всего скоростью на процессоре и готовым
+    интерфейсом с горячей клавишей, значком в трее и буфером обмена. При этом Whisper обычно
+    универсальнее по языкам и лучше переносит шумные записи. У облачных коммерческих сервисов
+    больше платформ и функций; Golos в обмен предлагает Linux, русский язык, бесплатность и
+    проверяемое локальное распознавание.</p>
+    <p class="sources">Сведения о конкурентах: <a href="https://docs.wisprflow.ai/articles/4709791908-understanding-privacy-mode-and-cloud-sync">облачное распознавание Wispr Flow</a>,
+    <a href="https://wisprflow.ai/pricing">цены и платформы Wispr Flow</a>,
+    <a href="https://superwhisper.com/docs/get-started/introduction">платформы Superwhisper</a>,
+    <a href="https://superwhisper.com/models">локальные модели Superwhisper</a>,
+    <a href="https://superwhisper.com/docs/get-started/sw-pro">цены Superwhisper</a>.</p>
+  </section>
+
+  <section aria-labelledby="cifry">
+    <h2 id="cifry">Скорость, память и точность</h2>
+    <h3>Наши замеры на слабом железе</h3>
+    <p>Всё измерено на <strong>Intel i7-2640M — двухъядерном ноутбучном процессоре 2011 года</strong>
+    с 8 ГБ памяти. Скрипты лежат в папке <a href="https://github.com/geft1310-hue/golos/tree/main/bench">bench/</a>,
+    любой замер можно повторить.</p>
+    <div class="scroll">
+      <table>
+        <tbody>
+          <tr><th scope="row">Скорость распознавания</th><td>RTF 0.31 — десять секунд речи за 3.1 секунды</td></tr>
+          <tr><th scope="row">Память в ожидании</th><td>около 65 МБ</td></tr>
+          <tr><th scope="row">Память с моделью</th><td>около 304 МБ</td></tr>
+          <tr><th scope="row">Возвращается при выгрузке</th><td>238 МБ из 273 МБ</td></tr>
+          <tr><th scope="row">Холодная загрузка модели</th><td>1.7–1.9 секунды</td></tr>
+          <tr><th scope="row">Место на диске</th><td>217 МБ</td></tr>
+          <tr><th scope="row">Сеть во время работы</th><td>ноль соединений</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Микрофон не открыт, пока клавиша не нажата, а модель выгружается после нескольких минут
+    простоя. При следующем нажатии загрузка начинается одновременно с записью — пока вы говорите.</p>
+
+    <h3>Точность, измеренная не нами</h3>
+    <p>WER — доля ошибочных слов; меньше значит лучше. В оценке авторов модели на десяти русских
+    тестовых наборах GigaAM v3 e2e-rnnt (его ставит Golos) получил средний WER <strong>11.2</strong>,
+    Whisper-large-v3 — 21.0. В стороннем замере на шести публичных русских наборах GigaAM получил
+    <strong>10.38</strong>, Whisper-large-v3-turbo — 13.25.</p>
+    <p><strong>Где Whisper лучше:</strong> на чистой близкой речи результаты близки, но на шумных
+    записях с эхом Whisper выиграл у GigaAM на 6–7 пунктов. Golos рассчитан на микрофон перед лицом,
+    а не на телефон в шумной комнате. Если звук плохой — выбирайте Whisper.</p>
+    <p class="sources">Источники: <a href="https://github.com/salute-developers/GigaAM/blob/main/evaluation.md">оценка авторов GigaAM</a>,
+    <a href="https://habr.com/ru/articles/1042574/">сторонний замер на шести наборах</a>.</p>
+  </section>
+
+  <section aria-labelledby="privatnost">
+    <h2 id="privatnost">Приватность: что программа видит и чего не делает</h2>
+    <p>Про приватность пишут все. Здесь она сформулирована как поведение, которое можно проверить,
+    включая неудобную часть, которую обычно не печатают.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th scope="col">Проверяемое свойство</th><th scope="col">Как проверено</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Не выходит в интернет во время диктовки</th><td><code>ss -tunp</code> по живому процессу: ноль сетевых соединений</td></tr>
+          <tr><th scope="row">Не пишет речь на диск; PCM-буфер обнуляется после распознавания</th><td><a href="https://github.com/geft1310-hue/golos/blob/main/bench/test_privacy.py">bench/test_privacy.py</a></td></tr>
+          <tr><th scope="row">Не сохраняет распознанный текст; последние фразы лежат только в RAM</th><td>поиск фразы-маркера по диску — не найдена</td></tr>
+          <tr><th scope="row">Не просит менеджер буфера обмена хранить текст на диске</th><td><code>Gtk.Clipboard.set_text()</code> без <code>store()</code></td></tr>
+          <tr><th scope="row">Не пишет текст в журнал — только длину</th><td>запись вида <code>распознано символов: 43</code></td></tr>
+          <tr><th scope="row">Не выполняет скачанный Python-код; модель — ONNX</th><td>веса закреплены на точном коммите и сверяются по SHA-256</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Единственное сетевое исключение:</strong> модель нужно один раз скачать. Это делает
+    отдельная программа <a href="https://github.com/geft1310-hue/golos/blob/main/tools/fetch_models.py">tools/fetch_models.py</a>,
+    которую запускает установщик или выбор другого варианта модели в настройках. В самом процессе
+    диктовки сетевого кода нет.</p>
+
+    <h3>Что программа видит</h3>
+    <p>Горячую клавишу приходится забирать у всей системы. Golos использует самый узкий механизм
+    X11: <code>XGrabKey</code> для <strong>одного конкретного кода клавиши</strong>, а не глобальный
+    слушатель всего, что вы печатаете.</p>
+    <blockquote><strong>Пока горячая клавиша удерживается, другие нажатия доставляются захватившему
+    приложению и не доходят до активного окна.</strong> Golos отбрасывает любое чужое событие первой
+    строкой обработчика: не хранит, не разбирает и не логирует его даже в режиме отладки.</blockquote>
+    <p>На практике во время удержания правого Ctrl печатать не получится; после отпускания всё снова
+    работает обычно. Проверка воспроизводится скриптом
+    <a href="https://github.com/geft1310-hue/golos/blob/main/bench/test_grab_exposure.py">bench/test_grab_exposure.py</a>.</p>
+  </section>
+
+  <section aria-labelledby="ogranicheniya">
+    <h2 id="ogranicheniya">Ограничения, честно</h2>
+    <ul>
+      <li><strong>Только русский язык.</strong> GigaAM v3 обучен для русского; именно поэтому модель
+        небольшая и быстрая на своём языке.</li>
+      <li><strong>Нужен Linux с X11.</strong> Универсального способа реализовать тот же сценарий
+        «удерживай одну глобальную клавишу» во всех окружениях Wayland сейчас нет. Golos определяет
+        Wayland при запуске и сообщает об ограничении. В Ubuntu и похожих системах можно выйти из
+        сеанса, нажать шестерёнку на экране входа и выбрать Xorg.</li>
+      <li><strong>Windows и Android пока не выпущены.</strong> Они есть в плане, но текущая версия —
+        только Linux/X11.</li>
+      <li><strong>Шум и эхо.</strong> На плохих записях Whisper может быть точнее.</li>
+    </ul>
+  </section>
+
+  <section class="faq" aria-labelledby="voprosy">
+    <h2 id="voprosy">Вопросы и ответы</h2>
+    <h3>Нужен ли интернет для распознавания речи?</h3>
+    <p>Нет. Интернет нужен один раз при установке, чтобы скачать 217 МБ модели. После этого
+    распознавание целиком происходит на вашем компьютере; процесс диктовки не открывает сетевых
+    соединений.</p>
+
+    <h3>Как надиктовать текст голосом в Linux?</h3>
+    <p>Установите Golos, поставьте курсор в нужное поле, зажмите правый Ctrl, скажите фразу,
+    отпустите клавишу и нажмите Ctrl+V. Текст вставится со знаками препинания в любую программу
+    с полем ввода.</p>
+
+    <h3>Golos сам ставит запятые и точки?</h3>
+    <p>Да. Знаки препинания, заглавные буквы и числа цифрами выдаёт модель GigaAM v3 как часть
+    распознавания. Произносить «запятая» или «точка» не нужно.</p>
+
+    <h3>Сколько стоит Golos?</h3>
+    <p>Нисколько. Исходный код открыт под лицензией MIT; нет регистрации, подписки и лимита слов.</p>
+
+    <h3>Работает ли Golos на Wayland?</h3>
+    <p>Текущая версия — нет, нужен сеанс X11 (Xorg). Golos использует X11-механизм узкого захвата
+    одной горячей клавиши; универсального равноценного механизма для всех Wayland-окружений нет.</p>
+
+    <h3>Какие языки поддерживаются?</h3>
+    <p>Только русский. Это сознательная специализация, а не скрытый многоязычный режим.</p>
+
+    <h3>Нужна ли видеокарта?</h3>
+    <p>Нет. Всё считается на процессоре. Наши замеры сделаны на двухъядерном ноутбучном CPU 2011 года.</p>
+
+    <h3>Чем Golos отличается от Wispr Flow и Superwhisper?</h3>
+    <p>Wispr Flow требует интернета и выполняет распознавание в облаке. Superwhisper умеет работать
+    локально, но официально не поддерживает Linux. Golos бесплатен, работает локально и создан для
+    Linux/X11, но понимает только русский и имеет меньше функций.</p>
+
+    <h3>Почему не взять Whisper?</h3>
+    <p>Whisper — разумный выбор для многих языков, видеокарты или шумных записей. Golos использует
+    GigaAM, потому что на CPU эта русскоязычная модель заметно быстрее и подходит для интерактивной
+    диктовки.</p>
+
+    <h3>Куда девается записанный звук?</h3>
+    <p>Звук живёт только в оперативной памяти, а буфер обнуляется после распознавания. Аудиофайлов
+    на диске не остаётся. Распознанный текст тоже не сохраняется на диск.</p>
+
+    <h3>Можно ли назначить другую клавишу?</h3>
+    <p>Да. В настройках можно выбрать другую клавишу, микрофон и время выгрузки модели.</p>
+
+    <h3>Сколько места и памяти нужно?</h3>
+    <p>217 МБ на диске под модель; около 65 МБ RAM в ожидании и около 304 МБ с загруженной моделью.</p>
+  </section>
+
+  <section aria-labelledby="ssylki">
+    <h2 id="ssylki">Ссылки</h2>
+    <ul>
+      <li><a href="https://github.com/geft1310-hue/golos">Исходный код и установка на GitHub</a></li>
+      <li><a href="https://github.com/geft1310-hue/golos/releases/tag/v0.1.0">Релиз Golos 0.1.0</a></li>
+      <li><a href="https://github.com/geft1310-hue/golos/issues">Сообщить о проблеме</a></li>
+      <li><a href="overview.ru.md">Чистая справка в Markdown</a></li>
+      <li><a href="llms.txt">Краткий llms.txt для автоматических помощников</a></li>
+      <li><a href="llms-full.txt">Расширенный контекст для автоматических помощников</a></li>
+      <li><a href="en/" hreflang="en">This page in English</a></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="blagodarnosti">
+    <h2 id="blagodarnosti">Из чего собрано</h2>
+    <p>Golos — небольшая обёртка вокруг
+    <a href="https://github.com/salute-developers/GigaAM">GigaAM v3</a> от SberDevices (MIT) —
+    модели распознавания — и <a href="https://github.com/istupakov/onnx-asr">onnx-asr</a> от
+    istupakov (MIT), который запускает её через numpy и ONNX Runtime без PyTorch. Сам Golos также
+    распространяется по лицензии MIT.</p>
+  </section>
+</main>
+
+<footer>
+  <p>Golos 0.1.0 · MIT · <a href="https://github.com/geft1310-hue/golos">GitHub</a><br>
+  Опубликовано и обновлено 4 августа 2026 года.</p>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://geft1310-hue.github.io/golos/#software",
+      "name": "Golos",
+      "alternateName": ["Голос", "golos"],
+      "description": "Бесплатная программа с открытым исходным кодом для голосового ввода текста на русском языке в Linux/X11. Распознавание выполняется локально моделью GigaAM v3, а готовый текст со знаками препинания попадает в буфер обмена. Интернет после установки не требуется.",
+      "url": "https://geft1310-hue.github.io/golos/",
+      "applicationCategory": "UtilitiesApplication",
+      "applicationSubCategory": "Speech recognition and dictation",
+      "operatingSystem": "Linux with X11",
+      "softwareVersion": "0.1.0",
+      "datePublished": "2026-08-04",
+      "dateModified": "2026-08-04",
+      "inLanguage": "ru",
+      "isAccessibleForFree": true,
+      "license": "https://opensource.org/licenses/MIT",
+      "codeRepository": "https://github.com/geft1310-hue/golos",
+      "downloadUrl": "https://github.com/geft1310-hue/golos",
+      "installUrl": "https://geft1310-hue.github.io/golos/#ustanovka",
+      "programmingLanguage": "Python",
+      "runtimePlatform": "Python 3.11+, GTK 3, ONNX Runtime",
+      "softwareRequirements": "Linux с X11, Python 3.11 или новее, GTK 3, микрофон",
+      "storageRequirements": "217 MB",
+      "memoryRequirements": "304 MB with the model loaded",
+      "processorRequirements": "CPU; no GPU required",
+      "image": "https://geft1310-hue.github.io/golos/og.png",
+      "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/InStock"},
+      "featureList": [
+        "Локальное распознавание русской речи без интернета и облака",
+        "Автоматические знаки препинания, заглавные буквы и числа цифрами",
+        "Push-to-talk по удержанию одной горячей клавиши",
+        "Готовый текст в буфере обмена для вставки в любую программу",
+        "RTF 0.31 на двухъядерном процессоре 2011 года",
+        "Аудио и распознанный текст не записываются на диск",
+        "Открытый исходный код под лицензией MIT"
+      ],
+      "author": {"@id": "https://github.com/geft1310-hue#person"},
+      "maintainer": {"@id": "https://github.com/geft1310-hue#person"},
+      "sameAs": ["https://github.com/geft1310-hue/golos"],
+      "isBasedOn": [
+        {"@type": "SoftwareApplication", "name": "GigaAM v3", "url": "https://github.com/salute-developers/GigaAM"},
+        {"@type": "SoftwareApplication", "name": "onnx-asr", "url": "https://github.com/istupakov/onnx-asr"}
+      ]
+    },
+    {
+      "@type": "Person",
+      "@id": "https://github.com/geft1310-hue#person",
+      "name": "geft1310-hue",
+      "url": "https://github.com/geft1310-hue"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://geft1310-hue.github.io/golos/#website",
+      "url": "https://geft1310-hue.github.io/golos/",
+      "name": "Golos — голосовой ввод текста офлайн для Linux",
+      "inLanguage": ["ru", "en"],
+      "about": {"@id": "https://geft1310-hue.github.io/golos/#software"}
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://geft1310-hue.github.io/golos/#breadcrumbs",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Golos", "item": "https://geft1310-hue.github.io/golos/"}
+      ]
+    },
+    {
+      "@type": "HowTo",
+      "@id": "https://geft1310-hue.github.io/golos/#install",
+      "name": "Как установить голосовой ввод Golos на Linux",
+      "description": "Установка бесплатной офлайн-диктовки Golos на Debian, Ubuntu или Linux Mint.",
+      "inLanguage": "ru",
+      "totalTime": "PT10M",
+      "estimatedCost": {"@type": "MonetaryAmount", "currency": "USD", "value": "0"},
+      "supply": [{"@type": "HowToSupply", "name": "Компьютер с Linux/X11"}, {"@type": "HowToSupply", "name": "Микрофон"}],
+      "tool": [{"@type": "HowToTool", "name": "Терминал"}, {"@type": "HowToTool", "name": "git"}],
+      "step": [
+        {"@type": "HowToStep", "position": 1, "name": "Скачать код", "text": "Выполните git clone https://github.com/geft1310-hue/golos.git"},
+        {"@type": "HowToStep", "position": 2, "name": "Открыть папку", "text": "Выполните cd golos"},
+        {"@type": "HowToStep", "position": 3, "name": "Запустить установщик", "text": "Выполните ./install.sh. Установщик проверит зависимости и один раз скачает модель весом 217 МБ."},
+        {"@type": "HowToStep", "position": 4, "name": "Запустить Golos", "text": "Выполните ./run.sh. Возле часов появится значок микрофона."},
+        {"@type": "HowToStep", "position": 5, "name": "Продиктовать фразу", "text": "Поставьте курсор в поле ввода, зажмите правый Ctrl, скажите фразу, отпустите клавишу и нажмите Ctrl+V."}
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://geft1310-hue.github.io/golos/#faq",
+      "inLanguage": "ru",
+      "mainEntity": [
+        {"@type": "Question", "name": "Нужен ли интернет для распознавания речи?", "acceptedAnswer": {"@type": "Answer", "text": "Нет. Интернет нужен один раз при установке, чтобы скачать 217 МБ модели. После этого распознавание целиком происходит на компьютере; процесс диктовки не открывает сетевых соединений."}},
+        {"@type": "Question", "name": "Как надиктовать текст голосом в Linux?", "acceptedAnswer": {"@type": "Answer", "text": "Установите Golos, поставьте курсор в поле, зажмите правый Ctrl, скажите фразу, отпустите клавишу и нажмите Ctrl+V. Текст вставится со знаками препинания в любую программу с полем ввода."}},
+        {"@type": "Question", "name": "Golos сам ставит запятые и точки?", "acceptedAnswer": {"@type": "Answer", "text": "Да. Знаки препинания, заглавные буквы и числа цифрами выдаёт модель GigaAM v3 как часть распознавания. Произносить команды пунктуации не нужно."}},
+        {"@type": "Question", "name": "Сколько стоит Golos?", "acceptedAnswer": {"@type": "Answer", "text": "Нисколько. Исходный код открыт под лицензией MIT; нет регистрации, подписки и лимита слов."}},
+        {"@type": "Question", "name": "Работает ли Golos на Wayland?", "acceptedAnswer": {"@type": "Answer", "text": "Текущая версия требует X11 (Xorg). Она использует X11-механизм узкого захвата одной горячей клавиши; универсального равноценного механизма для всех Wayland-окружений нет."}},
+        {"@type": "Question", "name": "Какие языки поддерживает Golos?", "acceptedAnswer": {"@type": "Answer", "text": "Только русский. GigaAM v3 — специализированная русскоязычная модель."}},
+        {"@type": "Question", "name": "Нужна ли видеокарта?", "acceptedAnswer": {"@type": "Answer", "text": "Нет. Всё считается на обычном процессоре; замеры выполнены на двухъядерном ноутбучном CPU 2011 года."}},
+        {"@type": "Question", "name": "Чем Golos отличается от Wispr Flow и Superwhisper?", "acceptedAnswer": {"@type": "Answer", "text": "Wispr Flow требует интернета и распознаёт речь в облаке. Superwhisper умеет работать локально, но официально не поддерживает Linux. Golos бесплатен, работает локально и создан для Linux/X11, но понимает только русский и имеет меньше функций."}},
+        {"@type": "Question", "name": "Почему не взять Whisper?", "acceptedAnswer": {"@type": "Answer", "text": "Whisper подходит для многих языков, видеокарты и шумных записей. Golos использует GigaAM, потому что эта русскоязычная модель заметно быстрее на CPU и подходит для интерактивной диктовки."}},
+        {"@type": "Question", "name": "Куда девается записанный звук?", "acceptedAnswer": {"@type": "Answer", "text": "Звук живёт только в оперативной памяти, буфер обнуляется после распознавания, аудиофайлов на диске не остаётся. Распознанный текст также не сохраняется на диск."}},
+        {"@type": "Question", "name": "Можно ли назначить другую клавишу?", "acceptedAnswer": {"@type": "Answer", "text": "Да. В настройках можно выбрать другую клавишу, микрофон и время выгрузки модели."}},
+        {"@type": "Question", "name": "Сколько места и памяти нужно?", "acceptedAnswer": {"@type": "Answer", "text": "217 МБ на диске под модель; около 65 МБ RAM в ожидании и около 304 МБ с загруженной моделью."}}
+      ]
+    }
+  ]
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+# Golos
+
+> Free, open-source, fully offline Russian voice dictation for Linux/X11. Hold a key,
+> speak, release, then paste punctuated text from the clipboard. Recognition uses
+> GigaAM v3 locally; no GPU, account, cloud service or subscription is required.
+
+Golos supports Russian only and currently requires Linux with X11. Internet access is
+used by a separate downloader only for the one-time model download. Audio and
+recognized text are not written to disk. Version 0.1.0, MIT license.
+
+## Primary documentation
+
+- [English website](https://geft1310-hue.github.io/golos/en/): Canonical English product page with installation, measurements, comparisons, privacy claims, limitations and source links.
+- [Russian website](https://geft1310-hue.github.io/golos/): Canonical Russian product page.
+- [English Markdown overview](https://geft1310-hue.github.io/golos/overview.en.md): Clean, citation-oriented project summary without page chrome.
+- [Russian Markdown overview](https://geft1310-hue.github.io/golos/overview.ru.md): Чистая русская справка для цитирования.
+- [Extended context](https://geft1310-hue.github.io/golos/llms-full.txt): Consolidated verified facts, limitations, installation steps and source hierarchy.
+
+## Source and verification
+
+- [Source repository](https://github.com/geft1310-hue/golos): Application code, README files and issue tracker.
+- [Release 0.1.0](https://github.com/geft1310-hue/golos/releases/tag/v0.1.0): First public release.
+- [Bench and privacy checks](https://github.com/geft1310-hue/golos/tree/main/bench): Reproducible speed, memory, hotkey, audio and privacy checks.
+- [Security-sensitive hotkey implementation](https://github.com/geft1310-hue/golos/blob/main/golos/hotkey.py): Narrow XGrabKey use for a single keycode.
+- [Separate model downloader](https://github.com/geft1310-hue/golos/blob/main/tools/fetch_models.py): The only project component designed to open a network connection.
+
+## Upstream projects and measurements
+
+- [GigaAM v3](https://github.com/salute-developers/GigaAM): Russian speech-recognition model by SberDevices, MIT license.
+- [GigaAM evaluation](https://github.com/salute-developers/GigaAM/blob/main/evaluation.md): Vendor accuracy and punctuation measurements.
+- [onnx-asr](https://github.com/istupakov/onnx-asr): ONNX inference wrapper used by Golos, MIT license.
+- [Independent Russian ASR benchmark](https://habr.com/ru/articles/1042574/): Third-party CPU speed and WER comparison cited by the project.
+
+## Optional
+
+- [Issue tracker](https://github.com/geft1310-hue/golos/issues): Bug reports and feature requests.
+- [Discussions](https://github.com/geft1310-hue/golos/discussions): Public project discussion.
+- [Russian README](https://github.com/geft1310-hue/golos/blob/main/README.ru.md): Detailed user guide in Russian.
+- [English README](https://github.com/geft1310-hue/golos/blob/main/README.md): Repository front page in English.

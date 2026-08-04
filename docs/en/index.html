@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Golos — free offline Russian voice dictation for Linux</title>
+<meta name="description" content="Free, open-source Russian voice typing for Linux/X11. Hold a key, speak, release — punctuated text is in your clipboard. Fully offline after setup.">
+<link rel="canonical" href="https://geft1310-hue.github.io/golos/en/">
+<link rel="alternate" hreflang="ru" href="https://geft1310-hue.github.io/golos/">
+<link rel="alternate" hreflang="en" href="https://geft1310-hue.github.io/golos/en/">
+<link rel="alternate" hreflang="x-default" href="https://geft1310-hue.github.io/golos/en/">
+<meta name="author" content="geft1310-hue">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Golos">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ru_RU">
+<meta property="og:url" content="https://geft1310-hue.github.io/golos/en/">
+<meta property="og:title" content="Golos — free offline Russian voice dictation for Linux">
+<meta property="og:description" content="Hold a key, speak, release — punctuated Russian text is in your clipboard. Free, open source, no cloud and no subscription.">
+<meta property="og:image" content="https://geft1310-hue.github.io/golos/og.png">
+<meta property="og:image:secure_url" content="https://geft1310-hue.github.io/golos/og.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Golos — free offline Russian voice dictation for Linux">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Golos — free offline Russian voice dictation for Linux">
+<meta name="twitter:description" content="Hold a key, speak, release — punctuated Russian text is in your clipboard. No internet or subscription.">
+<meta name="twitter:image" content="https://geft1310-hue.github.io/golos/og.png">
+<meta name="twitter:image:alt" content="Golos — free offline Russian voice dictation for Linux">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../s.css">
+</head>
+<body>
+<header>
+  <p class="lang">🇷🇺 <a href="../" hreflang="ru">По-русски</a></p>
+  <h1>Golos — offline Russian voice dictation</h1>
+  <p class="tagline">Hold a key. Speak. Release. Punctuated text is already in your clipboard.</p>
+  <p>
+    <a class="cta" href="#install">Install</a>
+    <a class="cta ghost" href="https://github.com/geft1310-hue/golos">Source code on GitHub</a>
+  </p>
+</header>
+
+<main>
+  <!-- docs/demo.gif will go here after the user records a real demonstration. -->
+  <section class="summary" aria-labelledby="what-is-golos">
+    <h2 id="what-is-golos">What is Golos?</h2>
+    <p><strong>Golos</strong> (Russian for “voice”) is a free, open-source voice-typing application
+    for Russian speakers using Linux. Hold the right <kbd>Ctrl</kbd> key, speak, and release it:
+    the transcribed text appears in the clipboard, ready to paste anywhere with
+    <kbd>Ctrl</kbd>+<kbd>V</kbd>. Recognition runs <strong>entirely on your computer</strong>.
+    After the one-time model download, no internet connection is needed; speech is neither uploaded
+    nor written to disk.</p>
+    <p>Golos uses <strong>GigaAM v3</strong>, a Russian speech-recognition model from SberDevices,
+    through ONNX Runtime without PyTorch. The model emits punctuation, capital letters and numeric
+    digits as part of recognition. Golos currently runs on Linux with X11, requires no GPU, account
+    or subscription, and is licensed under MIT.</p>
+  </section>
+
+  <section aria-labelledby="facts">
+    <h2 id="facts">Facts at a glance</h2>
+    <div class="scroll">
+      <table>
+        <tbody>
+          <tr><th scope="row">Purpose</th><td>convert spoken Russian into text and place it in the clipboard</td></tr>
+          <tr><th scope="row">Platform</th><td>Linux with X11; the installer targets Debian, Ubuntu, Mint and related distributions</td></tr>
+          <tr><th scope="row">Internet</th><td>required once to download the model; not required for recognition</td></tr>
+          <tr><th scope="row">GPU</th><td>not required; inference runs on an ordinary CPU</td></tr>
+          <tr><th scope="row">Price</th><td>free and open source under the MIT license; no account or subscription</td></tr>
+          <tr><th scope="row">Language</th><td>Russian only</td></tr>
+          <tr><th scope="row">Punctuation</th><td>automatic punctuation, capitalization and numeric digits</td></tr>
+          <tr><th scope="row">Speed</th><td>RTF 0.31: ten seconds of speech transcribed in 3.1 seconds on a 2011 CPU</td></tr>
+          <tr><th scope="row">Disk space</th><td>217 MB for the recognition model</td></tr>
+          <tr><th scope="row">Memory</th><td>about 65 MB while idle and about 304 MB with the model loaded</td></tr>
+          <tr><th scope="row">Model</th><td>GigaAM v3 e2e-rnnt, ONNX int8, via <a href="https://github.com/istupakov/onnx-asr">onnx-asr</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="why">
+    <h2 id="why">Why it exists</h2>
+    <p>Russian voice typing often requires spoken commands such as “comma” and “full stop.” Google's
+    documentation lists Russian punctuation commands, while Gboard's advanced automatic-punctuation
+    feature officially lists several other languages but not Russian. Golos inserts punctuation
+    without spoken commands.</p>
+    <p>Instead of:</p>
+    <pre><code>привет как дела я сегодня буду в офисе часов в пять давай встретимся</code></pre>
+    <p>Golos produces:</p>
+    <pre><code>Привет, как дела? Я сегодня буду в офисе часов в 5. Давай встретимся.</code></pre>
+    <p>Punctuation is not bolted on by a separate post-processor: the model emits it as part of
+    recognition. GigaAM's published evaluation reports an F1 score of <strong>84.5</strong> for commas
+    and <strong>86.7</strong> for full stops.</p>
+    <p class="sources">Sources: <a href="https://support.google.com/docs/answer/4492226?hl=en">Google Docs voice typing</a>,
+    <a href="https://support.google.com/gboard/answer/11197787?hl=en">Gboard advanced voice typing</a>,
+    <a href="https://github.com/salute-developers/GigaAM/blob/main/evaluation.md">GigaAM evaluation</a>.</p>
+
+    <h3>Why not Whisper?</h3>
+    <p>Whisper is the obvious local alternative, but large Whisper models can run slower than real
+    time on a CPU. In an independent Russian ASR benchmark, <code>whisper-large-v3-turbo</code> had
+    CPU RTF 1.02: slightly more than ten seconds of processing for ten seconds of speech. GigaAM v3
+    e2e-rnnt had <strong>RTF 0.047 in the same benchmark — more than 20 times faster</strong>, with
+    comparable average accuracy on Russian. Golos chooses the smaller Russian-specialized model so
+    interactive dictation works without a GPU.</p>
+    <p class="sources">Source: <a href="https://habr.com/ru/articles/1042574/">independent benchmark of Russian ASR models</a> (article in Russian).</p>
+  </section>
+
+  <section aria-labelledby="install">
+    <h2 id="install">Install on Linux</h2>
+    <p>For Debian, Ubuntu, Linux Mint and related distributions, open a terminal and run:</p>
+    <pre><code>git clone https://github.com/geft1310-hue/golos.git
+cd golos
+./install.sh</code></pre>
+    <p>The installer checks what is missing rather than blindly reinstalling everything. It downloads
+    the 217 MB model <strong>once</strong> and can add Golos to your login session.</p>
+    <pre><code>./run.sh</code></pre>
+    <p>A microphone icon appears in the system tray. Golos is ready.</p>
+  </section>
+
+  <section aria-labelledby="use">
+    <h2 id="use">How to use it</h2>
+    <ol>
+      <li>Place the cursor where you want the text.</li>
+      <li>Hold the right <kbd>Ctrl</kbd> key. A small overlay shows <code>● Запись</code>
+        (“Recording”), a live level meter and a timer.</li>
+      <li>Speak Russian.</li>
+      <li>Release the key. The overlay shows <code>Распознаю…</code> (“Recognizing”), followed by
+        <code>✓ Скопировано</code> (“Copied”).</li>
+      <li>Press <kbd>Ctrl</kbd>+<kbd>V</kbd>.</li>
+    </ol>
+    <p>The clipboard approach works in any application with a text field: browser, email, messenger
+    or editor. Long speech is split at natural pauses and joined again. The hotkey, microphone,
+    model-unload timer and optional clipboard clearing are configurable.</p>
+  </section>
+
+  <section aria-labelledby="comparison">
+    <h2 id="comparison">How it compares</h2>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th scope="col">Option</th><th scope="col">Offline</th><th scope="col">Linux</th><th scope="col">Russian punctuation</th><th scope="col">Price</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Golos</th><td class="yes">yes</td><td class="yes">yes, X11</td><td class="yes">automatic</td><td>free, MIT</td></tr>
+          <tr><th scope="row">Google Docs / standard Gboard</th><td>cloud features depend on internet access</td><td>Google Docs in a browser</td><td>spoken commands exist; advanced auto-punctuation does not list Russian</td><td>free</td></tr>
+          <tr><th scope="row"><a href="https://wisprflow.ai/">Wispr Flow</a></th><td>no; transcription always runs in the cloud</td><td>no; Mac, Windows, iPhone and Android</td><td>yes</td><td>free limits; Pro $15/month or $12/month billed annually</td></tr>
+          <tr><th scope="row"><a href="https://superwhisper.com/">Superwhisper</a></th><td>yes, with local models</td><td>no; macOS, Windows, iPhone and iPad</td><td>yes</td><td>free plan; Pro from $8.49/month</td></tr>
+          <tr><th scope="row">Whisper / whisper.cpp locally</th><td class="yes">yes</td><td class="yes">yes</td><td>yes</td><td>free</td></tr>
+          <tr><th scope="row">Vosk</th><td class="yes">yes</td><td class="yes">yes</td><td>standard models do not emit punctuation</td><td>free</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Compared with local Whisper, Golos focuses on CPU speed and a ready-to-use push-to-talk
+    interface with tray icon and clipboard output. Whisper supports many more languages and can be
+    better on noisy recordings. Commercial cloud tools cover more platforms and features; Golos
+    trades that breadth for Linux support, Russian specialization, zero cost and verifiably local
+    recognition.</p>
+    <p class="sources">Competitor sources: <a href="https://docs.wisprflow.ai/articles/4709791908-understanding-privacy-mode-and-cloud-sync">Wispr Flow cloud processing</a>,
+    <a href="https://wisprflow.ai/pricing">Wispr Flow pricing and platforms</a>,
+    <a href="https://superwhisper.com/docs/get-started/introduction">Superwhisper platforms</a>,
+    <a href="https://superwhisper.com/models">Superwhisper local models</a>,
+    <a href="https://superwhisper.com/docs/get-started/sw-pro">Superwhisper pricing</a>.</p>
+  </section>
+
+  <section aria-labelledby="numbers">
+    <h2 id="numbers">Speed, memory and accuracy</h2>
+    <h3>Our measurements on deliberately old hardware</h3>
+    <p>Everything below was measured on an <strong>Intel i7-2640M, a two-core laptop CPU from
+    2011</strong>, with 8 GB of RAM. The scripts are in the
+    <a href="https://github.com/geft1310-hue/golos/tree/main/bench">bench/ directory</a>, so every
+    measurement can be reproduced.</p>
+    <div class="scroll">
+      <table>
+        <tbody>
+          <tr><th scope="row">Recognition speed</th><td>RTF 0.31 — ten seconds of speech in 3.1 seconds</td></tr>
+          <tr><th scope="row">Idle memory</th><td>about 65 MB</td></tr>
+          <tr><th scope="row">Memory with model loaded</th><td>about 304 MB</td></tr>
+          <tr><th scope="row">Memory returned after unload</th><td>238 MB out of 273 MB</td></tr>
+          <tr><th scope="row">Cold model load</th><td>1.7–1.9 seconds</td></tr>
+          <tr><th scope="row">Disk space</th><td>217 MB</td></tr>
+          <tr><th scope="row">Network connections while running</th><td>zero</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The microphone is closed until the key is pressed, and the model unloads after a few idle
+    minutes. At the next press, loading starts at the same time as recording — while you are speaking.</p>
+
+    <h3>Accuracy measured by other people</h3>
+    <p>WER is the percentage of words recognized incorrectly; lower is better. In the model vendor's
+    ten-set Russian evaluation, GigaAM v3 e2e-rnnt (the Golos default) averaged
+    <strong>11.2</strong>, versus 21.0 for Whisper-large-v3. In a separate six-set benchmark,
+    GigaAM scored <strong>10.38</strong> and Whisper-large-v3-turbo 13.25.</p>
+    <p><strong>Where Whisper wins:</strong> results were close for clean, close-microphone speech,
+    but Whisper beat GigaAM by 6–7 points on noisy, reverberant recordings. Golos is designed for
+    a microphone in front of the speaker, not a phone across a noisy room. Choose Whisper when
+    audio quality is poor.</p>
+    <p class="sources">Sources: <a href="https://github.com/salute-developers/GigaAM/blob/main/evaluation.md">GigaAM vendor evaluation</a>,
+    <a href="https://habr.com/ru/articles/1042574/">independent six-dataset benchmark</a>.</p>
+  </section>
+
+  <section aria-labelledby="privacy">
+    <h2 id="privacy">Privacy: what Golos sees and never does</h2>
+    <p>The privacy claims are stated as testable behavior, including the uncomfortable detail most
+    global-hotkey applications leave undocumented.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th scope="col">Testable property</th><th scope="col">Verification</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">No network access during dictation</th><td><code>ss -tunp</code> against the live process: zero network connections</td></tr>
+          <tr><th scope="row">Speech is never written to disk; the PCM buffer is zeroed after recognition</th><td><a href="https://github.com/geft1310-hue/golos/blob/main/bench/test_privacy.py">bench/test_privacy.py</a></td></tr>
+          <tr><th scope="row">Recognized text is not stored; recent phrases exist only in RAM</th><td>disk-wide marker search found nothing</td></tr>
+          <tr><th scope="row">No request for the clipboard manager to persist text to disk</th><td><code>Gtk.Clipboard.set_text()</code> without <code>store()</code></td></tr>
+          <tr><th scope="row">Logs contain text length, never the text</th><td>entries such as <code>recognized characters: 43</code></td></tr>
+          <tr><th scope="row">Downloaded Python code is not executed; the model is ONNX</th><td>model files are pinned to a commit and verified with SHA-256</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>The one network exception:</strong> the model must be downloaded once. A separate
+    program, <a href="https://github.com/geft1310-hue/golos/blob/main/tools/fetch_models.py">tools/fetch_models.py</a>,
+    does that during installation or when the user deliberately selects another model variant.
+    The dictation process itself contains no networking code.</p>
+
+    <h3>What the hotkey can see</h3>
+    <p>Golos uses the narrowest X11 mechanism available: <code>XGrabKey</code> for
+    <strong>one specific keycode</strong>, not a global listener for every key you type.</p>
+    <blockquote><strong>While the hotkey is held, other key events are delivered to the grabbing
+    application and do not reach the focused window.</strong> Golos discards every unrelated event
+    on the first line of its handler: it is not stored, inspected or logged, even in debug mode.</blockquote>
+    <p>In practice, typing does not work while the right Ctrl key is held; normal behavior returns
+    immediately after release. The behavior is reproducible with
+    <a href="https://github.com/geft1310-hue/golos/blob/main/bench/test_grab_exposure.py">bench/test_grab_exposure.py</a>.</p>
+  </section>
+
+  <section aria-labelledby="limits">
+    <h2 id="limits">Limitations, stated plainly</h2>
+    <ul>
+      <li><strong>Russian only.</strong> GigaAM v3 is specialized for Russian; that specialization
+        is why it can be small and fast on its one language.</li>
+      <li><strong>Linux with X11 is required.</strong> There is currently no universal equivalent
+        for the same “hold one global key” interaction across all Wayland environments. Golos detects
+        Wayland at startup and explains the limitation. On Ubuntu and similar systems, choose an Xorg
+        session from the gear menu on the login screen.</li>
+      <li><strong>Windows and Android are not released.</strong> They are planned, but the current
+        application is Linux/X11 only.</li>
+      <li><strong>Noise and reverberation.</strong> Whisper may be more accurate on poor recordings.</li>
+    </ul>
+  </section>
+
+  <section class="faq" aria-labelledby="faq">
+    <h2 id="faq">Frequently asked questions</h2>
+    <h3>Does Russian speech recognition need an internet connection?</h3>
+    <p>Not with Golos. Internet is needed once to download the 217 MB model. Recognition then runs
+    entirely on the computer, and the dictation process opens no network connections.</p>
+
+    <h3>How do I type Russian by voice on Linux?</h3>
+    <p>Install Golos, put the cursor in any text field, hold right Ctrl, speak Russian, release the
+    key and press Ctrl+V. The punctuated text is pasted into the current application.</p>
+
+    <h3>Does Golos add Russian punctuation automatically?</h3>
+    <p>Yes. GigaAM v3 emits punctuation, capital letters and numeric digits as part of recognition.
+    You do not need to say “comma” or “full stop.”</p>
+
+    <h3>Is Golos free?</h3>
+    <p>Yes. It is open source under the MIT license, with no registration, subscription or word limit.</p>
+
+    <h3>Does Golos work on Wayland?</h3>
+    <p>The current version does not; it requires X11/Xorg. It relies on an X11 mechanism for narrowly
+    grabbing one push-to-talk key, and there is no universal equivalent across all Wayland desktops.</p>
+
+    <h3>Which languages does Golos support?</h3>
+    <p>Russian only. It deliberately uses a Russian-specialized model rather than a multilingual one.</p>
+
+    <h3>Does it need a GPU?</h3>
+    <p>No. Inference runs on the CPU. The published measurements use a two-core laptop CPU from 2011.</p>
+
+    <h3>How is Golos different from Wispr Flow and Superwhisper?</h3>
+    <p>Wispr Flow requires internet access and always transcribes in the cloud. Superwhisper supports
+    local models but does not officially support Linux. Golos is free, local and designed for
+    Linux/X11, but supports only Russian and has fewer features.</p>
+
+    <h3>Why not use Whisper?</h3>
+    <p>Whisper is a good choice for many languages, GPU systems and noisy recordings. Golos uses
+    GigaAM because this Russian-specialized model is substantially faster on a CPU and suits
+    interactive dictation.</p>
+
+    <h3>Is recorded speech stored?</h3>
+    <p>No. Audio lives only in RAM, and its buffer is zeroed after recognition. No recording file is
+    left on disk, and recognized text is not persisted either.</p>
+
+    <h3>Can I change the hotkey?</h3>
+    <p>Yes. The settings also let you select the microphone and the model-unload timeout.</p>
+
+    <h3>How much disk space and RAM does it use?</h3>
+    <p>The model uses 217 MB of disk space. Golos uses about 65 MB of RAM while idle and about
+    304 MB with the model loaded.</p>
+  </section>
+
+  <section aria-labelledby="links">
+    <h2 id="links">Links</h2>
+    <ul>
+      <li><a href="https://github.com/geft1310-hue/golos">Source code and installation on GitHub</a></li>
+      <li><a href="https://github.com/geft1310-hue/golos/releases/tag/v0.1.0">Golos 0.1.0 release</a></li>
+      <li><a href="https://github.com/geft1310-hue/golos/issues">Report a problem</a></li>
+      <li><a href="../overview.en.md">Plain Markdown overview</a></li>
+      <li><a href="../llms.txt">Concise llms.txt for automated assistants</a></li>
+      <li><a href="../llms-full.txt">Extended context for automated assistants</a></li>
+      <li><a href="../" hreflang="ru">Страница по-русски</a></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="credits">
+    <h2 id="credits">Credits</h2>
+    <p>Golos is a small wrapper around <a href="https://github.com/salute-developers/GigaAM">GigaAM v3</a>
+    by SberDevices (MIT), the recognition model, and
+    <a href="https://github.com/istupakov/onnx-asr">onnx-asr</a> by istupakov (MIT), which runs it
+    through numpy and ONNX Runtime without PyTorch. Golos itself is also licensed under MIT.</p>
+  </section>
+</main>
+
+<footer>
+  <p>Golos 0.1.0 · MIT · <a href="https://github.com/geft1310-hue/golos">GitHub</a><br>
+  Published and updated August 4, 2026.</p>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://geft1310-hue.github.io/golos/#software",
+      "name": "Golos",
+      "alternateName": ["Голос", "golos"],
+      "description": "Free, open-source Russian voice dictation for Linux/X11. Recognition runs locally with GigaAM v3, and punctuated text is placed in the clipboard. No internet connection is required after setup.",
+      "url": "https://geft1310-hue.github.io/golos/en/",
+      "applicationCategory": "UtilitiesApplication",
+      "applicationSubCategory": "Speech recognition and dictation",
+      "operatingSystem": "Linux with X11",
+      "softwareVersion": "0.1.0",
+      "datePublished": "2026-08-04",
+      "dateModified": "2026-08-04",
+      "inLanguage": "en",
+      "isAccessibleForFree": true,
+      "license": "https://opensource.org/licenses/MIT",
+      "codeRepository": "https://github.com/geft1310-hue/golos",
+      "downloadUrl": "https://github.com/geft1310-hue/golos",
+      "installUrl": "https://geft1310-hue.github.io/golos/en/#install",
+      "programmingLanguage": "Python",
+      "runtimePlatform": "Python 3.11+, GTK 3, ONNX Runtime",
+      "softwareRequirements": "Linux with X11, Python 3.11 or newer, GTK 3, microphone",
+      "storageRequirements": "217 MB",
+      "memoryRequirements": "304 MB with the model loaded",
+      "processorRequirements": "CPU; no GPU required",
+      "image": "https://geft1310-hue.github.io/golos/og.png",
+      "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/InStock"},
+      "featureList": [
+        "Fully local Russian speech recognition without internet or cloud processing",
+        "Automatic punctuation, capitalization and numeric digits",
+        "Push-to-talk operation using one held hotkey",
+        "Clipboard output for pasting into any application",
+        "RTF 0.31 on a two-core CPU from 2011",
+        "Audio and recognized text are not written to disk",
+        "Open source under the MIT license"
+      ],
+      "author": {"@id": "https://github.com/geft1310-hue#person"},
+      "maintainer": {"@id": "https://github.com/geft1310-hue#person"},
+      "sameAs": ["https://github.com/geft1310-hue/golos"],
+      "isBasedOn": [
+        {"@type": "SoftwareApplication", "name": "GigaAM v3", "url": "https://github.com/salute-developers/GigaAM"},
+        {"@type": "SoftwareApplication", "name": "onnx-asr", "url": "https://github.com/istupakov/onnx-asr"}
+      ]
+    },
+    {
+      "@type": "Person",
+      "@id": "https://github.com/geft1310-hue#person",
+      "name": "geft1310-hue",
+      "url": "https://github.com/geft1310-hue"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://geft1310-hue.github.io/golos/#website",
+      "url": "https://geft1310-hue.github.io/golos/",
+      "name": "Golos — offline Russian voice dictation for Linux",
+      "inLanguage": ["ru", "en"],
+      "about": {"@id": "https://geft1310-hue.github.io/golos/#software"}
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://geft1310-hue.github.io/golos/en/#breadcrumbs",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Golos", "item": "https://geft1310-hue.github.io/golos/"},
+        {"@type": "ListItem", "position": 2, "name": "English", "item": "https://geft1310-hue.github.io/golos/en/"}
+      ]
+    },
+    {
+      "@type": "HowTo",
+      "@id": "https://geft1310-hue.github.io/golos/en/#install-guide",
+      "name": "How to install Golos voice dictation on Linux",
+      "description": "Install the free offline Golos dictation app on Debian, Ubuntu or Linux Mint.",
+      "inLanguage": "en",
+      "totalTime": "PT10M",
+      "estimatedCost": {"@type": "MonetaryAmount", "currency": "USD", "value": "0"},
+      "supply": [{"@type": "HowToSupply", "name": "Linux computer with X11"}, {"@type": "HowToSupply", "name": "Microphone"}],
+      "tool": [{"@type": "HowToTool", "name": "Terminal"}, {"@type": "HowToTool", "name": "git"}],
+      "step": [
+        {"@type": "HowToStep", "position": 1, "name": "Clone the source", "text": "Run git clone https://github.com/geft1310-hue/golos.git"},
+        {"@type": "HowToStep", "position": 2, "name": "Open the project directory", "text": "Run cd golos"},
+        {"@type": "HowToStep", "position": 3, "name": "Run the installer", "text": "Run ./install.sh. It checks dependencies and downloads the 217 MB model once."},
+        {"@type": "HowToStep", "position": 4, "name": "Start Golos", "text": "Run ./run.sh. A microphone icon appears in the system tray."},
+        {"@type": "HowToStep", "position": 5, "name": "Dictate a phrase", "text": "Place the cursor in any text field, hold right Ctrl, speak Russian, release the key and press Ctrl+V."}
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://geft1310-hue.github.io/golos/en/#faq-data",
+      "inLanguage": "en",
+      "mainEntity": [
+        {"@type": "Question", "name": "Does Russian speech recognition need an internet connection?", "acceptedAnswer": {"@type": "Answer", "text": "Not with Golos. Internet is needed once to download the 217 MB model. Recognition then runs entirely on the computer, and the dictation process opens no network connections."}},
+        {"@type": "Question", "name": "How do I type Russian by voice on Linux?", "acceptedAnswer": {"@type": "Answer", "text": "Install Golos, put the cursor in any text field, hold right Ctrl, speak Russian, release the key and press Ctrl+V. Punctuated text is pasted into the current application."}},
+        {"@type": "Question", "name": "Does Golos add Russian punctuation automatically?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. GigaAM v3 emits punctuation, capital letters and numeric digits as part of recognition. Spoken punctuation commands are not required."}},
+        {"@type": "Question", "name": "Is Golos free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. It is open source under the MIT license, with no registration, subscription or word limit."}},
+        {"@type": "Question", "name": "Does Golos work on Wayland?", "acceptedAnswer": {"@type": "Answer", "text": "The current version requires X11/Xorg. It relies on an X11 mechanism for narrowly grabbing one push-to-talk key, and there is no universal equivalent across all Wayland desktops."}},
+        {"@type": "Question", "name": "Which languages does Golos support?", "acceptedAnswer": {"@type": "Answer", "text": "Russian only. It deliberately uses a Russian-specialized model rather than a multilingual one."}},
+        {"@type": "Question", "name": "Does Golos need a GPU?", "acceptedAnswer": {"@type": "Answer", "text": "No. Inference runs on the CPU. The published measurements use a two-core laptop CPU from 2011."}},
+        {"@type": "Question", "name": "How is Golos different from Wispr Flow and Superwhisper?", "acceptedAnswer": {"@type": "Answer", "text": "Wispr Flow requires internet access and always transcribes in the cloud. Superwhisper supports local models but does not officially support Linux. Golos is free, local and designed for Linux/X11, but supports only Russian and has fewer features."}},
+        {"@type": "Question", "name": "Why not use Whisper?", "acceptedAnswer": {"@type": "Answer", "text": "Whisper is a good choice for many languages, GPU systems and noisy recordings. Golos uses GigaAM because this Russian-specialized model is substantially faster on a CPU and suits interactive dictation."}},
+        {"@type": "Question", "name": "Is recorded speech stored?", "acceptedAnswer": {"@type": "Answer", "text": "No. Audio lives only in RAM, its buffer is zeroed after recognition, and no recording file is left on disk. Recognized text is not persisted either."}},
+        {"@type": "Question", "name": "Can I change the hotkey?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The settings also let you select the microphone and the model-unload timeout."}},
+        {"@type": "Question", "name": "How much disk space and RAM does Golos use?", "acceptedAnswer": {"@type": "Answer", "text": "The model uses 217 MB of disk space. Golos uses about 65 MB of RAM while idle and about 304 MB with the model loaded."}}
+      ]
+    }
+  ]
+}
+</script>
+</body>
+</html>

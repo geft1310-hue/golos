@@ -1,0 +1,190 @@
+/* Одна таблица стилей на обе страницы. Без внешних шрифтов и без скриптов:
+   страница должна полностью читаться поисковым роботом из исходного HTML. */
+
+:root {
+  --bg: #ffffff;
+  --fg: #1b1a19;
+  --muted: #5f5b57;
+  --line: #e3e0dc;
+  --accent: #c8352c;
+  --card: #faf8f6;
+  --code: #f3f0ec;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14120f;
+    --fg: #e9e5df;
+    --muted: #a09a92;
+    --line: #2e2a25;
+    --accent: #e0453c;
+    --card: #1c1916;
+    --code: #211d19;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  padding: 0 1.25rem 5rem;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+main, header, footer { max-width: 50rem; margin: 0 auto; }
+
+header { padding: 3rem 0 0; }
+
+.lang {
+  font-size: .875rem;
+  color: var(--muted);
+}
+.lang a { color: var(--muted); }
+
+h1 {
+  font-size: clamp(1.9rem, 5vw, 2.6rem);
+  line-height: 1.15;
+  letter-spacing: -.02em;
+  margin: .6rem 0 .4rem;
+}
+
+h2 {
+  font-size: 1.4rem;
+  line-height: 1.25;
+  letter-spacing: -.01em;
+  margin: 3rem 0 .75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+
+h3 { font-size: 1.08rem; margin: 2rem 0 .5rem; }
+
+.tagline {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+}
+
+p { margin: 0 0 1rem; }
+
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+
+ul, ol { margin: 0 0 1rem; padding-left: 1.4rem; }
+li { margin-bottom: .35rem; }
+
+/* Короткая справка в начале — то, что имеет смысл цитировать целиком. */
+.summary {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  padding: 1.1rem 1.25rem;
+  margin: 1.75rem 0;
+}
+.summary h2 {
+  border: 0;
+  margin: 0 0 .65rem;
+  padding: 0;
+  font-size: 1.18rem;
+}
+.summary p:last-child { margin-bottom: 0; }
+.summary strong { font-weight: 600; }
+
+.sources {
+  color: var(--muted);
+  font-size: .875rem;
+}
+
+blockquote {
+  margin: 1.5rem 0;
+  padding: 0 0 0 1rem;
+  border-left: 3px solid var(--line);
+  color: var(--muted);
+}
+
+pre {
+  background: var(--code);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: .9rem 1rem;
+  overflow-x: auto;
+  font-size: .9rem;
+  line-height: 1.5;
+}
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .9em;
+}
+p code, li code, td code { background: var(--code); padding: .1em .35em; border-radius: 3px; }
+
+.scroll { overflow-x: auto; margin: 0 0 1.25rem; }
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: .94rem;
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: .5rem .7rem;
+  border-bottom: 1px solid var(--line);
+}
+th { font-weight: 600; }
+thead th { border-bottom: 2px solid var(--line); white-space: nowrap; }
+
+.yes { color: var(--accent); font-weight: 600; }
+
+kbd {
+  font-family: inherit;
+  font-size: .85em;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: .05em .4em;
+  background: var(--card);
+  white-space: nowrap;
+}
+
+.faq h3 { border-top: 1px solid var(--line); padding-top: 1.25rem; }
+
+.cta {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  padding: .6rem 1.2rem;
+  border-radius: 5px;
+  margin: .25rem .5rem .5rem 0;
+}
+.cta.ghost {
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--line);
+}
+
+figure { margin: 1.5rem 0; }
+img { max-width: 100%; height: auto; border-radius: 4px; }
+figcaption { font-size: .875rem; color: var(--muted); margin-top: .5rem; }
+
+footer {
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+  font-size: .875rem;
+  color: var(--muted);
+}
+
+@media (max-width: 38rem) {
+  body { padding-inline: 1rem; }
+  header { padding-top: 1.75rem; }
+  h2 { margin-top: 2.25rem; }
+  .summary { padding: .9rem 1rem; }
+  th, td { padding: .45rem .55rem; }
+  .cta { display: block; text-align: center; margin-right: 0; }
+}
