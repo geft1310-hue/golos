@@ -12,6 +12,11 @@ models/
 # bench/sample.wav каждый записывает себе сам, см. bench/sample_audio.py
 *.wav
 
+# Исходник демо-ролика: сотни мегабайт, нужен только для сборки docs/demo.gif.
+# Сам demo.gif коммитим — он показывается в README.
+docs/demo-raw.mkv
+docs/demo-palette.png
+
 # Прочее
 *.log
 .ruff_cache/
