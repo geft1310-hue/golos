@@ -1,0 +1,92 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Главное правило общения
+
+- Всегда общайся с пользователем только на русском языке.
+- На русском языке пиши все пояснения перед действиями и вызовами инструментов,
+  промежуточные сообщения о ходе работы, вопросы, предупреждения, разбор ошибок и итоги.
+- Команды, пути, имена файлов, идентификаторы и дословный вывод программ не переводи,
+  но их назначение и результат объясняй по-русски.
+
+## Среда и команды
+
+Golos — приложение голосовой диктовки на Python 3.11+ и GTK 3 для Linux/X11.
+Оно запускается прямо из репозитория; `pyproject.toml` настраивает Ruff, но не описывает
+собираемый или устанавливаемый Python-пакет.
+
+Полная пользовательская установка идемпотентна: она создаёт venv с доступом к системным
+GTK/Xlib-пакетам, ставит закреплённые зависимости, скачивает модель по умолчанию и предлагает
+настроить автозапуск:
+
+```bash
+./install.sh
+./run.sh                       # запускает .venv/bin/python -m golos
+```
+
+Для окружения разработки, совпадающего с CI:
+
+```bash
+sudo apt-get update -qq
+sudo apt-get install -y --no-install-recommends \
+  python3-venv python3-gi python3-gi-cairo gir1.2-gtk-3.0 \
+  gir1.2-ayatanaappindicator3-0.1 python3-xlib libportaudio2 xvfb
+python3 -m venv --system-site-packages .venv
+.venv/bin/python -m pip install -r requirements.lock.txt
+.venv/bin/python -m pip install ruff==0.16.1
+```
+
+Команды запускаются из корня репозитория. Единой цели `test` нет; CI состоит из отдельных
+проверок:
+
+```bash
+.venv/bin/ruff check .
+.venv/bin/python -m compileall -q golos tools bench
+.venv/bin/python bench/test_platform.py
+.venv/bin/python tools/check_site.py
+bash -n install.sh && bash -n run.sh
+
+xvfb-run -a .venv/bin/python -c '
+import golos.__main__, golos.asr, golos.audio, golos.clipboard
+import golos.config, golos.hotkey, golos.platform_check
+import golos.ui.overlay, golos.ui.settings, golos.ui.tray
+print("все модули импортируются")
+'
+```
+
+В проекте нет pytest discovery. Каждый файл в `bench/` — самостоятельный тест,
+диагностический сценарий или benchmark со своим `main()`. Запуск одного сценария:
+
+```bash
+.venv/bin/python bench/test_platform.py                    # без экрана, подходит для CI
+.venv/bin/python bench/test_asr.py /path/to/speech.wav    # нужна скачанная модель
+.venv/bin/python bench/test_audio.py 4                    # нужен микрофон
+.venv/bin/python bench/benchmark.py /path/to/speech.wav --models gigaam-v3-e2e-rnnt
+```
+
+Аппаратные проверки X11 и микрофона, а также модельные тесты не входят в CI. Запускай их
+только в подходящем живом окружении с локальной моделью и собственной незакоммиченной записью.
+
+## Общая архитектура
+
+- `golos/__main__.py` — точка сборки компонентов и машина состояний приложения
+  (`idle` → `recording` → `transcribing`); она владеет главным циклом GTK.
+- GTK работает только в главном потоке. Горячая клавиша X11, PortAudio, загрузка модели и
+  распознавание работают в фоновых потоках; переходы к UI выполняются через `GLib.idle_add`.
+- `Config` из `golos/config.py` атомарно хранится в `~/.config/golos/config.json`, а модели —
+  в `~/.local/share/golos/models/`.
+- Сетевое скачивание моделей вынесено из процесса диктовки в `tools/fetch_models.py`.
+- `docs/` — двуязычная витрина GitHub Pages; её структуру проверяет `tools/check_site.py`.
+
+## Общие правила репозитория
+
+- Сохраняй границу приватности: процесс диктовки не должен выходить в сеть, записывать на диск
+  речь или распознанный текст и журналировать их содержимое.
+- Не коммить записи речи и веса моделей (`*.wav`, другие аудиоформаты, `*.onnx`,
+  `*.onnx_data`). CI намеренно запрещает такие файлы.
+- Код, комментарии, журналы и текст интерфейса преимущественно русские; сохраняй этот язык и
+  существующий объяснительный стиль комментариев.
+- Ruff настроен на Python 3.11 и длину строки 100 символов.
+- Подробные инструкции по отдельным зонам ответственности лежат в `.claude/rules/` и
+  загружаются автоматически при работе с соответствующими файлами.
