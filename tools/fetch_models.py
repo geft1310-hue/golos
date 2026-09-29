@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Скачивание весов GigaAM v3 в ~/.local/share/golos/models.
+"""Скачивание весов моделей в ~/.local/share/golos/models (или GOLOS_MODELS_DIR).
 
 Отдельно от бенчмарка по двум причинам:
 
@@ -17,7 +17,8 @@
 
 S5: репозиторий пинится на конкретный commit sha, после скачивания пишется
 manifest.json с sha256 каждого файла — при последующих стартах приложение сверяет.
-S7: права 0700 выставляются после скачивания.
+S7: права 0700 выставляются после скачивания (только для пользовательского каталога:
+стaging для deb-пакета собирается под root и права там выставляет упаковщик).
 """
 
 from __future__ import annotations
@@ -29,23 +30,40 @@ import os
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from golos.models import MODELS as MODEL_SPECS  # noqa: E402
+
 # Умолчание — то же, что в Config.model. Остальные варианты качаются по требованию,
 # когда человек выбирает их в настройках: класть 645 МБ при установке незачем.
 MODELS = ["gigaam-v3-e2e-rnnt"]
-QUANTIZATION = "int8"
-MODELS_DIR = Path.home() / ".local/share/golos/models"
+MODELS_DIR = Path(os.environ.get("GOLOS_MODELS_DIR", Path.home() / ".local/share/golos/models"))
 
 
-def build_allow_patterns(model_name: str, quantization: str) -> list[str]:
-    """Повторяет логику Resolver._download_model, но под нашим контролем.
+def build_allow_patterns(model_name: str) -> list[str]:
+    """Какие файлы репозитория качать.
 
-    Нужно, чтобы качались только файлы нужного варианта (~225 МБ), а не весь
-    репозиторий (4.46 ГБ со всеми вариантами и весами fp32).
+    Для gigaam повторяет логику Resolver._download_model (нужен только свой вариант,
+    ~225 МБ, а не весь репозиторий в 4.46 ГБ). Для whisper имена файлов фиксированы
+    форматом transformers.js, так что список задаётся явно — включая разницу
+    в суффиксе квантования: у Xenova это *_quantized.onnx, у onnx-community *_int8.onnx.
     """
+    spec = MODEL_SPECS[model_name]
+    quant = spec["quantization"]
+    if spec.get("whisper"):
+        suffix = f"_{quant}" if quant else ""
+        return [
+            "config.json",
+            "preprocessor_config.json",
+            "generation_config.json",
+            "vocab.json",
+            "added_tokens.json",
+            f"onnx/encoder_model{suffix}.onnx",
+            f"onnx/decoder_model_merged{suffix}.onnx",
+        ]
     from onnx_asr.loader import create_asr_resolver
 
     resolver = create_asr_resolver(model_name, offline=False)
-    files = list(resolver.model_type._get_model_files(quantization).values())
+    files = list(resolver.model_type._get_model_files(quant).values())
     files = [*files, *(f.removeprefix("**/") for f in files if f.startswith("**/"))]
     return [
         "config.json",
@@ -56,9 +74,7 @@ def build_allow_patterns(model_name: str, quantization: str) -> list[str]:
 
 
 def repo_id_of(model_name: str) -> str:
-    from onnx_asr.resolver import model_repos
-
-    return model_repos[model_name]
+    return MODEL_SPECS[model_name]["repo_id"]
 
 
 def model_files(target: Path) -> list[Path]:
@@ -66,7 +82,7 @@ def model_files(target: Path) -> list[Path]:
 
     `.cache/huggingface/*` исключаем сознательно: это служебные метаданные самой
     библиотеки, они меняются при каждой проверке обновлений, и их sha256 в манифесте
-    давал бы ложные срабатывания проверки целостности (S5).
+    давали бы ложные срабатывания проверки целостности (S5).
     """
     return [
         p
@@ -100,7 +116,7 @@ def fetch(model_name: str) -> int:
         print(f"[{model_name}] уже скачано, пропускаю")
         return 0
 
-    patterns = build_allow_patterns(model_name, QUANTIZATION)
+    patterns = build_allow_patterns(model_name)
     print(f"[{model_name}] репозиторий {repo_id}")
     print(f"[{model_name}] файлы: {patterns}")
 
@@ -123,7 +139,7 @@ def fetch(model_name: str) -> int:
     manifest = {
         "repo_id": repo_id,
         "revision": revision,
-        "quantization": QUANTIZATION,
+        "quantization": MODEL_SPECS[model_name]["quantization"],
         "files": {str(p.relative_to(target)): sha256_of(p) for p in files},
     }
     (target / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
@@ -164,6 +180,11 @@ def main() -> int:
     os.chmod(MODELS_DIR.parent, 0o700)
 
     names = sys.argv[1:] or MODELS
+    unknown = [n for n in names if n not in MODEL_SPECS]
+    if unknown:
+        print(f"неизвестные модели: {unknown}; доступные: {sorted(MODEL_SPECS)}", file=sys.stderr)
+        return 2
+
     rc = 0
     for name in names:
         try:
