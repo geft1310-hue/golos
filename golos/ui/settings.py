@@ -21,6 +21,7 @@ from gi.repository import GLib, Gtk  # noqa: E402
 from golos.audio import list_input_devices  # noqa: E402
 from golos.config import CONFIG_DIR, MODELS_DIR, Config  # noqa: E402
 from golos.hotkey import keycode_label  # noqa: E402
+from golos.models import MODELS as MODEL_SPECS  # noqa: E402
 
 log = logging.getLogger(__name__)
 
@@ -29,11 +30,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 # Размеры — сколько занимает вариант на диске. Показываем их прямо в списке: человек
 # должен видеть цену выбора до того, как выберет, а не после.
-MODEL_CHOICES = [
-    ("gigaam-v3-e2e-rnnt", "Точнее, со знаками препинания (рекомендуется)", 217),
-    ("gigaam-v3-e2e-ctc", "Быстрее, тоже со знаками препинания", 215),
-    ("gigaam-v3-ctc", "Самая быстрая, без знаков препинания", 215),
-]
+MODEL_CHOICES = [(name, data["title"], data["size_mb"]) for name, data in MODEL_SPECS.items()]
 
 
 def model_is_downloaded(name: str) -> bool:

@@ -180,6 +180,10 @@ class Recognizer:
             if not (model_dir / "manifest.json").is_file():
                 raise ModelFilesMissingError(str(model_dir))
 
+            from golos.models import spec  # noqa: PLC0415
+
+            model_spec = spec(cfg.model)
+
             import onnx_asr  # noqa: PLC0415  — тяжёлый импорт, только когда реально нужен
             import onnxruntime as ort  # noqa: PLC0415
 
@@ -187,10 +191,12 @@ class Recognizer:
             sess_options = ort.SessionOptions()
             sess_options.intra_op_num_threads = cfg.threads
             sess_options.inter_op_num_threads = 1
+            # Для whisper передаём repo_id: короткого имени нет в model_repos onnx-asr.
+            # Для gigaam работает родное имя; квантование берём из каталога моделей.
             model = onnx_asr.load_model(
-                cfg.model,
+                model_spec["repo_id"] if model_spec.get("whisper") else cfg.model,
                 str(model_dir),
-                quantization=cfg.quantization or None,
+                quantization=model_spec.get("quantization", cfg.quantization) or None,
                 sess_options=sess_options,
             )
             load_s = time.perf_counter() - t0
@@ -236,7 +242,12 @@ class Recognizer:
         делает сам onnx-asr, поэтому промежуточных wav-файлов нет нигде.
         """
         self.ensure_loaded()
-        chunks = split_audio(pcm, sample_rate, self._config.max_chunk_seconds)
+        from golos.models import spec  # noqa: PLC0415
+
+        model_spec = spec(self._config.model)
+        # Предел окна у каждой модели свой (GigaAM ~25 с, Whisper ~30 с).
+        max_chunk = min(self._config.max_chunk_seconds, model_spec["max_chunk_seconds"])
+        chunks = split_audio(pcm, sample_rate, max_chunk)
         total = len(chunks)
 
         parts: list[str] = []
@@ -249,7 +260,14 @@ class Recognizer:
                 model = self._model
                 if model is None:  # выгрузили между кусками — поднимаем заново
                     break
-                text = model.recognize(chunk, sample_rate=sample_rate, channel="mean")
+                # Автодетект языка Whisper на коротких фразах ошибается — фиксируем.
+                language = model_spec.get("language")
+                if language:
+                    text = model.recognize(
+                        chunk, sample_rate=sample_rate, channel="mean", language=language
+                    )
+                else:
+                    text = model.recognize(chunk, sample_rate=sample_rate, channel="mean")
             if text:
                 parts.append(text.strip())
 
